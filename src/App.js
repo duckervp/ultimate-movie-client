@@ -1,23 +1,51 @@
-import logo from './logo.svg';
 import './App.css';
+import { Route, Routes } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Private from './components/Private';
+import Layout from './components/Layout';
+import LoginForm from './features/user/LoginForm';
+import Profile from './features/user/Profile';
+import RegisterForm from './features/user/RegisterForm';
+import Movie from './features/movie/Movie';
+import VideoPlayer from './features/movie/VideoPlayer';
+import AdminManagement from './features/admin/AdminManagement';
+import EnhancedTable from './features/admin/MovieManagement';
+import GenreEnhancedTable from './features/admin/GenreManagement';
+import ProducerEnhancedTable from './features/admin/ProducerManagement';
+import NewMovie from './features/admin/NewMovie';
+import Doormat from './features/movie/Doormat';
+import OAuth2LoginRedirect from './features/user/OAuth2LoginRedirect';
 
 function App() {
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <ToastContainer />
+      <Routes>
+        <Route path="/" element={<Layout />}>
+          <Route index element={<Doormat />} />
+          <Route path=":slug">
+            <Route index element={<Movie />} />
+            <Route path="play" element={<VideoPlayer />} />
+          </Route>
+          <Route path="user">
+            <Route index element={<Private children={<Profile />} />} />
+          </Route>
+        </Route>
+        <Route path="admin" element={<Layout admin />}>
+          <Route index element={<Private admin children={<AdminManagement />} />} />
+          <Route path="movie" element={<Private admin children={<EnhancedTable />} />} />
+          <Route path="edit-movie/:slug" element={<Private admin children={<NewMovie />} />} />
+          <Route path="create-movie" element={<Private admin children={<NewMovie />} />} />
+          <Route path="genre" element={<Private admin children={<GenreEnhancedTable />} />} />
+          <Route path="character" element={<Private admin children={<AdminManagement />} />} />
+          <Route path="producer" element={<Private admin children={<ProducerEnhancedTable />} />} />
+        </Route>
+        <Route path="/login" element={<LoginForm />} />
+        <Route path="/login/oauth2/redirect" element={<OAuth2LoginRedirect />} />
+        <Route path="/register" element={<RegisterForm />} />
+      </Routes>
+
     </div>
   );
 }
