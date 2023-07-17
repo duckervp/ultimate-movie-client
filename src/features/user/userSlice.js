@@ -20,7 +20,7 @@ export const register = createAsyncThunk("user/register", async (body) => {
 })
 
 export const fetchUser = createAsyncThunk("user/fetch", async () => {
-  const url = "users";
+  const url = "users/";
 
   let accessToken = localStorage.getItem("accessToken");
 
@@ -32,7 +32,7 @@ export const fetchUser = createAsyncThunk("user/fetch", async () => {
   return data;
 });
 
-export const saveUser = createAsyncThunk("user/modify", async (body) => {
+export const updateUser = createAsyncThunk("user/modify", async (body) => {
   const url = `users/${body.id}`;
 
   let accessToken = localStorage.getItem("accessToken");
@@ -81,6 +81,7 @@ export const userSlice = createSlice({
       })
     }).addCase(register.fulfilled, (state, { payload }) => {
       state.accessToken = payload.access_token;
+      localStorage.setItem("accessToken", payload.access_token);
     }).addCase(register.rejected, (error) => {
       console.log(error);
       toast.error("Register failed!", {
@@ -94,13 +95,13 @@ export const userSlice = createSlice({
       toast.error("Fetch user failed!", {
         position: toast.POSITION.TOP_RIGHT
       });
-    }).addCase(saveUser.fulfilled, (state, {payload}) => {
+    }).addCase(updateUser.fulfilled, (state, {payload}) => {
       const user = payload;
       Object.keys(user).forEach(key => state[key] = user[key]);
       toast.success("Updated user successfully!", {
         position: toast.POSITION.TOP_RIGHT
       })
-    }).addCase(saveUser.rejected, (state, error) => {
+    }).addCase(updateUser.rejected, (state, error) => {
       toast.error("Update user failed!", {
         position: toast.POSITION.TOP_RIGHT
       })

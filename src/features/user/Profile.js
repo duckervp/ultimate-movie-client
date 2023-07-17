@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchUser, saveUser } from "./userSlice";
+import { updateUser } from "./userSlice";
 import { Box, Typography, CardMedia, Divider, IconButton, Modal } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
@@ -67,7 +67,7 @@ const Profile = () => {
       address: data.get('address')
     };
     try {
-      await dispatch(saveUser(body));
+      await dispatch(updateUser(body));
       handleClose();
     } catch (error) { }
   }

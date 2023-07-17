@@ -65,12 +65,14 @@ const Header = ({ admin }) => {
   const isAuthenticated = Boolean(useSelector(state => state.user.accessToken));
   const user = useSelector(state => state.user);
   const [searchValue, setSearchValue] = useState("");
+  const [fetchCount, setFetchCount] = useState(0);
 
   React.useEffect(() => {
-    if (!user?.id) {
+    if (!user?.id && fetchCount === 0) {
       dispatch(fetchUser());
+      setFetchCount(1);
     }
-  }, [dispatch, user]);
+  }, [dispatch, user, fetchCount]);
 
   const handleLogout = () => {
     dispatch(logout());
