@@ -1,35 +1,48 @@
 import { Avatar, Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "./userSlice";
-import { Link as RouterLink, Navigate, useNavigate } from "react-router-dom";
+import { resetPassword } from "./userSlice";
+import { Link as RouterLink, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { isValidToken } from "../../jwtHelper";
 import SocialLogin from "./SocialLogin";
+import NotFound from "../../components/NotFound";
 
-const LoginForm = () => {
+const ResetPasswordForm = () => {
   const accessToken = useSelector(state => state.user.accessToken);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  if (!searchParams?.get("token")) {
+    return <NotFound />
+  }
 
   const handleSubmit = async e => {
     e.preventDefault();
-    
+
     const data = new FormData(e.currentTarget);
-    
+
+    console.log(data.get("password"));
+
     const body = {
-      username: data.get("username"),
-      password: data.get("password")
+      newPassword: data.get("password")
     };
+
     let success = true;
-    
+
+    const payload = {
+      token: searchParams?.get("token"),
+      body
+    }
+
     try {
-      await dispatch(login(body)).unwrap();
+      await dispatch(resetPassword(payload)).unwrap();
     } catch (error) {
       success = false;
     }
-    
+
     if (success) {
-      navigate("/user", { replace: true });
+      navigate("/login", { replace: true });
     }
   }
 
@@ -51,24 +64,15 @@ const LoginForm = () => {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in
+            Reset Password
           </Typography>
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }} autoComplete="off">
             <TextField
               margin="normal"
               required
               fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoFocus
-            />
-            <TextField
-              margin="normal"
-              required
-              fullWidth
               name="password"
-              label="Password"
+              label="New Password"
               type="password"
               id="password"
             />
@@ -78,24 +82,21 @@ const LoginForm = () => {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign In
+              Submit
             </Button>
             <Grid container>
               <Grid item xs sx={{ textAlign: "left" }}>
-                <Link component={RouterLink} to="/reset-password-request" variant="body2">
-                  Forgot password?
+                <Link component={RouterLink} to="/" variant="body2" sx={{ display: "inline-block" }}>
+                  {"Back to Home"}
                 </Link>
               </Grid>
               <Grid item>
-                <Link component={RouterLink} to="/register" variant="body2">
-                  {"Sign Up"}
+                <Link component={RouterLink} to="/login" variant="body2">
+                  {"Sign In"}
                 </Link>
               </Grid>
             </Grid>
             <SocialLogin />
-            <Link component={RouterLink} to="/" variant="body2" sx={{ mt: 2, display: "inline-block" }}>
-              {"Back to Home"}
-            </Link>
           </Box>
         </Box>
       </Box>
@@ -109,4 +110,4 @@ const LoginForm = () => {
   }
 }
 
-export default LoginForm;
+export default ResetPasswordForm;

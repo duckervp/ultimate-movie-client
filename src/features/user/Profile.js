@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { updateUser } from "./userSlice";
+import { changePassword, updateUser } from "./userSlice";
 import { Box, Typography, CardMedia, Divider, IconButton, Modal } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
@@ -17,6 +17,7 @@ import Link from "../../components/Link";
 import { isAdmin } from "../../jwtHelper";
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
+import LockResetIcon from '@mui/icons-material/LockReset';
 
 const titleUp = (string) => {
   if (string.length === 0) {
@@ -45,17 +46,27 @@ const Profile = () => {
   const user = useSelector(state => state.user);
   const accessToken = useSelector(state => state.user.accessToken);
 
-  const [open, setOpen] = useState(false);
+  const [profileFormOpen, setProfileFormOpen] = useState(false);
 
-  const handleOpen = () => {
-    setOpen(true);
+  const handleOpenProfileForm = () => {
+    setProfileFormOpen(true);
   };
 
-  const handleClose = () => {
-    setOpen(false);
+  const handleCloseProfileForm = () => {
+    setProfileFormOpen(false);
   };
 
-  const handleSubmit = async (e) => {
+  const [passwordFormOpen, setPasswordFormOpen] = useState(false);
+
+  const handleOpenPasswordForm = () => {
+    setPasswordFormOpen(true);
+  };
+
+  const handleClosePasswordForm = () => {
+    setPasswordFormOpen(false);
+  };
+
+  const handleProfileFormSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
     const body = {
@@ -68,12 +79,28 @@ const Profile = () => {
     };
     try {
       await dispatch(updateUser(body));
-      handleClose();
+      handleCloseProfileForm();
     } catch (error) { }
   }
 
+  const handlePasswordFormSubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData(e.currentTarget);
+    const body = {
+      email: user?.email,
+      oldPassword: data.get('oldPassword'),
+      newPassword: data.get('newPassword')
+    };
+    try {
+      await dispatch(changePassword(body)).unwrap();
+      handleClosePasswordForm();
+    } catch (error) { 
+      console.log(error);
+    }
+  }
+
   return (
-    <Box component={Container} sx={{mt: 2}}>
+    <Box component={Container} sx={{ mt: 2 }}>
       <Grid container >
         <Grid lg={3} sx={{ height: "80vh", padding: 1 }}>
           <Box backgroundColor={"whitesmoke"} width={"100%"} height={"100%"} padding={2}>
@@ -89,9 +116,14 @@ const Profile = () => {
                 <Typography sx={{ fontWeight: "bold" }}>
                   Information
                 </Typography>
-                <IconButton onClick={handleOpen} sx={{ p: 0 }} color="secondary">
-                  <DriveFileRenameOutlineIcon />
-                </IconButton>
+                <Box>
+                  <IconButton onClick={handleOpenProfileForm} sx={{ p: 0, mr: 1 }} color="inherit">
+                    <DriveFileRenameOutlineIcon />
+                  </IconButton>
+                  <IconButton onClick={handleOpenPasswordForm} sx={{ p: 0 }} color="inherit">
+                    <LockResetIcon />
+                  </IconButton>
+                </Box>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
                 <EmailIcon sx={{ marginRight: "5px" }} />
@@ -145,8 +177,8 @@ const Profile = () => {
       </Grid>
 
       <Modal
-        open={open}
-        onClose={handleClose}
+        open={profileFormOpen}
+        onClose={handleCloseProfileForm}
         aria-labelledby="parent-modal-title"
         aria-describedby="parent-modal-description"
       >
@@ -160,9 +192,9 @@ const Profile = () => {
             }}
           >
             <Typography component="h1" variant="h5" margin="5px 0 10px">
-              Edit profile
+              Edit Profile
             </Typography>
-            <Box component="form" noValidate sx={{ mt: 3 }} onSubmit={handleSubmit}>
+            <Box component="form" noValidate sx={{ mt: 3 }} onSubmit={handleProfileFormSubmit}>
               <Grid container spacing={2}>
                 <Grid container item xs={8} spacing={2}>
                   <Grid item xs={12}>
@@ -225,6 +257,56 @@ const Profile = () => {
                   />
                 </Grid>
               </Grid>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                sx={{ mt: 3, mb: 2 }}
+              >
+                Save
+              </Button>
+            </Box>
+          </Box>
+        </Container>
+      </Modal>
+
+      <Modal
+        open={passwordFormOpen}
+        onClose={handleClosePasswordForm}
+        aria-labelledby="parent-modal-title"
+        aria-describedby="parent-modal-description"
+      >
+        <Container component="main" maxWidth="sm" sx={{ ...style }}>
+          <CssBaseline />
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <Typography component="h1" variant="h5" margin="5px 0 10px">
+              Change Password
+            </Typography>
+            <Box component="form" noValidate sx={{ mt: 3 }} onSubmit={handlePasswordFormSubmit}>
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                type="password"
+                label="Old Password"
+                name="oldPassword"
+                id="old-password"
+              />
+              <TextField
+                margin="normal"
+                required
+                fullWidth
+                type="password"
+                label="New Password"
+                name="newPassword"
+                id="new-password"
+              />
               <Button
                 type="submit"
                 fullWidth

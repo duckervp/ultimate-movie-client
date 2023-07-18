@@ -45,6 +45,44 @@ export const updateUser = createAsyncThunk("user/modify", async (body) => {
   return body;
 });
 
+export const sendResetPasswordRequest = createAsyncThunk("user/resetPasswordRequest", async (body) => {
+  const url = `users/reset-password-request?email=${body.email}`;
+
+  const { data } = await Dxios.get(url);
+
+  console.log(data);
+
+  return data;
+});
+
+export const resetPassword = createAsyncThunk("user/resetPassword", async ({ token, body }) => {
+  const url = `users/reset-password?token=${token}`;
+
+  const { data } = await Dxios.patch(url, body);
+
+  return data;
+});
+
+export const changePassword = createAsyncThunk("user/changePassword", async (body) => {
+  const url = `users/change-password`;
+
+  try {
+    let accessToken = localStorage.getItem("accessToken");
+
+    console.log(body);
+    const { data } = await Dxios.patch(url, body, {
+      headers: {
+        authorization: `Bearer ${accessToken}`
+      }
+    });
+    console.log(data);
+    return data;
+  } catch (error) {
+    throw error;
+  }
+
+});
+
 const initialState = {
   id: "",
   address: "",
@@ -90,19 +128,43 @@ export const userSlice = createSlice({
     }).addCase(fetchUser.fulfilled, (state, { payload }) => {
       const user = payload?.result;
       Object.keys(user).forEach(key => state[key] = user[key]);
-    }).addCase(fetchUser.rejected, (state, error) => {
+    }).addCase(fetchUser.rejected, (state) => {
       state = initialState;
       toast.error("Fetch user failed!", {
         position: toast.POSITION.TOP_RIGHT
       });
-    }).addCase(updateUser.fulfilled, (state, {payload}) => {
+    }).addCase(updateUser.fulfilled, (state, { payload }) => {
       const user = payload;
       Object.keys(user).forEach(key => state[key] = user[key]);
       toast.success("Updated user successfully!", {
         position: toast.POSITION.TOP_RIGHT
       })
-    }).addCase(updateUser.rejected, (state, error) => {
+    }).addCase(updateUser.rejected, () => {
       toast.error("Update user failed!", {
+        position: toast.POSITION.TOP_RIGHT
+      })
+    }).addCase(sendResetPasswordRequest.fulfilled, () => {
+      toast.success("Please visit your email to get the reset password link!", {
+        position: toast.POSITION.TOP_RIGHT
+      })
+    }).addCase(sendResetPasswordRequest.rejected, () => {
+      toast.error("Reset password request failed!", {
+        position: toast.POSITION.TOP_RIGHT
+      })
+    }).addCase(resetPassword.fulfilled, () => {
+      toast.success("Reset password successfully!", {
+        position: toast.POSITION.TOP_RIGHT
+      })
+    }).addCase(resetPassword.rejected, () => {
+      toast.error("Reset password failed!", {
+        position: toast.POSITION.TOP_RIGHT
+      })
+    }).addCase(changePassword.fulfilled, () => {
+      toast.success("Change password successfully!", {
+        position: toast.POSITION.TOP_RIGHT
+      })
+    }).addCase(changePassword.rejected, () => {
+      toast.error("Change password failed!", {
         position: toast.POSITION.TOP_RIGHT
       })
     });

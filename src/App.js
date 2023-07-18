@@ -16,6 +16,8 @@ import ProducerEnhancedTable from './features/admin/ProducerManagement';
 import NewMovie from './features/admin/NewMovie';
 import Doormat from './features/movie/Doormat';
 import OAuth2LoginRedirect from './features/user/OAuth2LoginRedirect';
+import ResetPasswordRequestForm from './features/user/ResetPasswordRequestForm';
+import ResetPasswordForm from './features/user/ResetPasswordForm';
 
 function App() {
   return (
@@ -44,6 +46,8 @@ function App() {
         <Route path="/login" element={<LoginForm />} />
         <Route path="/login/oauth2/redirect" element={<OAuth2LoginRedirect />} />
         <Route path="/register" element={<RegisterForm />} />
+        <Route path="/reset-password-request" element={<ResetPasswordRequestForm />} />
+        <Route path="/reset-password" element={<ResetPasswordForm />} />
       </Routes>
 
     </div>

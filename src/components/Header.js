@@ -68,11 +68,11 @@ const Header = ({ admin }) => {
   const [fetchCount, setFetchCount] = useState(0);
 
   React.useEffect(() => {
-    if (!user?.id && fetchCount === 0) {
+    if (isAuthenticated && !user?.id && fetchCount === 0) {
       dispatch(fetchUser());
       setFetchCount(1);
     }
-  }, [dispatch, user, fetchCount]);
+  }, [dispatch, user, fetchCount, isAuthenticated]);
 
   const handleLogout = () => {
     dispatch(logout());

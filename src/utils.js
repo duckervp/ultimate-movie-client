@@ -71,7 +71,7 @@ export const getListGenre = (genres) => {
 export const sortEpisodeFnc = (ep1, ep2) => {
   if (ep1.id > ep2.id) {
     return 1;
-  } else if (ep1.id > ep2.id) {
+  } else if (ep1.id < ep2.id) {
     return -1;
   }
   return 0;
