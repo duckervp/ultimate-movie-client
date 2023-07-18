@@ -18,6 +18,7 @@ import Doormat from './features/movie/Doormat';
 import OAuth2LoginRedirect from './features/user/OAuth2LoginRedirect';
 import ResetPasswordRequestForm from './features/user/ResetPasswordRequestForm';
 import ResetPasswordForm from './features/user/ResetPasswordForm';
+import NotFound from './components/NotFound';
 
 function App() {
   return (
@@ -48,6 +49,7 @@ function App() {
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/reset-password-request" element={<ResetPasswordRequestForm />} />
         <Route path="/reset-password" element={<ResetPasswordForm />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
 
     </div>

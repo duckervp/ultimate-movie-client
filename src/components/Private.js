@@ -6,17 +6,11 @@ import { isAdmin, isValidToken } from "../jwtHelper";
 import NotFound from "./NotFound";
 
 const validateToken = (accessToken, dispatch) => {
-  let msg;
-  if (!accessToken) {
-    msg = "Login is required!";
-  } else if (!isValidToken(accessToken)) {
-    msg = "Token is expired!";
-  }
-  if (msg) {
-    toast.error(msg, {
+  if (!isValidToken(accessToken)) {
+    dispatch(logout());
+    toast.error("Login is required!", {
       position: toast.POSITION.TOP_RIGHT
     })
-    dispatch(logout());
     return false;
   }
   return true;

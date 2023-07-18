@@ -9,7 +9,6 @@ const OAuth2LoginRedirect = () => {
 
   if (searchParams.get("token")) {
     const token = searchParams.get("token");
-    console.log(token);
     dispatch(oauth2Login(token));
     return <Navigate to={"/"} />
   } else {
