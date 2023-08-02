@@ -1,14 +1,13 @@
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { changePassword, updateUser } from "./userSlice";
-import { Box, Typography, CardMedia, Divider, IconButton, Modal } from "@mui/material";
+import { Box, Typography, CardMedia, Divider, IconButton, Modal, Tooltip } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
 import CallIcon from '@mui/icons-material/Call';
 import MapIcon from '@mui/icons-material/Map';
 import EmailIcon from '@mui/icons-material/Email';
 import Button from '@mui/material/Button';
-import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Container from '@mui/material/Container';
@@ -94,7 +93,7 @@ const Profile = () => {
     try {
       await dispatch(changePassword(body)).unwrap();
       handleClosePasswordForm();
-    } catch (error) { 
+    } catch (error) {
       console.log(error);
     }
   }
@@ -110,56 +109,63 @@ const Profile = () => {
                 {titleUp(user.name)}
               </Typography>
             </Box>
+
+            {isAdmin(accessToken) &&
+              <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                <Typography sx={{ fontWeight: "bold" }}>
+                  Administrator
+                </Typography>
+                <Link to={"/admin"}
+                  sx={{
+                    display: { xs: 'none', md: 'flex' },
+                    fontFamily: 'monospace',
+                    letterSpacing: '.3rem',
+                    color: 'inherit',
+                    textDecoration: 'none',
+                  }} >
+                  <Tooltip title="Dashboard">
+                    <IconButton variant="contained" color="inherit" sx={{ p: 0 }} ><AdminPanelSettingsIcon /></IconButton>
+                  </Tooltip>
+                </Link>
+              </Box>}
+
             <Divider sx={{ backgroundColor: "black", height: 2 }} />
-            <Box marginTop={2}>
+            <Box sx={{my: 2}}>
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography sx={{ fontWeight: "bold" }}>
                   Information
                 </Typography>
                 <Box>
-                  <IconButton onClick={handleOpenProfileForm} sx={{ p: 0, mr: 1 }} color="inherit">
-                    <DriveFileRenameOutlineIcon />
-                  </IconButton>
-                  <IconButton onClick={handleOpenPasswordForm} sx={{ p: 0 }} color="inherit">
-                    <LockResetIcon />
-                  </IconButton>
+                  <Tooltip title="Edit profile">
+                    <IconButton onClick={handleOpenProfileForm} sx={{ p: 0, mr: 1 }} color="inherit">
+                      <DriveFileRenameOutlineIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title="Change password">
+                    <IconButton onClick={handleOpenPasswordForm} sx={{ p: 0 }} color="inherit">
+                      <LockResetIcon />
+                    </IconButton>
+                  </Tooltip>
                 </Box>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
-                <EmailIcon sx={{ marginRight: "5px" }} />
+                <EmailIcon style={{fontSize: 20, marginRight: 5}} />
                 {user.email}
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
-                <CallIcon sx={{ marginRight: "5px" }} />
+                <CallIcon style={{fontSize: 20, marginRight: 5}} />
                 {user.phoneNumber}
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
-                <AssignmentIndIcon sx={{ marginRight: "5px" }} />
+                <AssignmentIndIcon style={{fontSize: 20, marginRight: 5}} />
                 {user.gender}
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
-                <MapIcon sx={{ marginRight: "5px" }} />
+                <MapIcon style={{fontSize: 20, marginRight: 5}} />
                 {user.address ? user.address : "N/A"}
               </Box>
             </Box>
 
-            {isAdmin(accessToken) && <Box>
-              <Divider sx={{ backgroundColor: "black", height: 2, my: 2 }} />
-              <Typography sx={{ fontWeight: "bold", mb: 2 }}>
-                Administrator
-              </Typography>
-              <Link to={"/admin"}
-                children={<Button variant="contained" color="inherit" startIcon={<AdminPanelSettingsIcon />}>
-                  Dashboard
-                </Button>}
-                sx={{
-                  display: { xs: 'none', md: 'flex' },
-                  fontFamily: 'monospace',
-                  letterSpacing: '.3rem',
-                  color: 'inherit',
-                  textDecoration: 'none',
-                }} />
-            </Box>}
           </Box>
         </Grid>
         <Grid lg={9} sx={{ display: "flex", flexDirection: "column" }}>
@@ -179,11 +185,10 @@ const Profile = () => {
       <Modal
         open={profileFormOpen}
         onClose={handleCloseProfileForm}
-        aria-labelledby="parent-modal-title"
-        aria-describedby="parent-modal-description"
+        aria-labelledby="parent-modal-title-1"
+        aria-describedby="parent-modal-description-1"
       >
         <Container component="main" maxWidth="sm" sx={{ ...style }}>
-          <CssBaseline />
           <Box
             sx={{
               display: 'flex',
@@ -273,11 +278,10 @@ const Profile = () => {
       <Modal
         open={passwordFormOpen}
         onClose={handleClosePasswordForm}
-        aria-labelledby="parent-modal-title"
-        aria-describedby="parent-modal-description"
+        aria-labelledby="parent-modal-title-2"
+        aria-describedby="parent-modal-description-2"
       >
         <Container component="main" maxWidth="sm" sx={{ ...style }}>
-          <CssBaseline />
           <Box
             sx={{
               display: 'flex',

@@ -97,7 +97,7 @@ const FileUploader = (props) => {
             required
             id={`url-for${label}`}
             name="url"
-            label="URL"
+            label={`${label} URL`}
             defaultValue={url}
             multiline
             fullWidth

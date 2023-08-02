@@ -19,10 +19,12 @@ import OAuth2LoginRedirect from './features/user/OAuth2LoginRedirect';
 import ResetPasswordRequestForm from './features/user/ResetPasswordRequestForm';
 import ResetPasswordForm from './features/user/ResetPasswordForm';
 import NotFound from './components/NotFound';
+import { CssBaseline } from '@mui/material';
 
 function App() {
   return (
     <div className="App">
+      <CssBaseline />
       <ToastContainer />
       <Routes>
         <Route path="/" element={<Layout />}>

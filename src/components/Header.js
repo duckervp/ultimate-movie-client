@@ -6,7 +6,6 @@ import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import Avatar from '@mui/material/Avatar';
-import Button from '@mui/material/Button';
 import Tooltip from '@mui/material/Tooltip';
 import AdbIcon from '@mui/icons-material/Adb';
 import NotificationsIcon from '@mui/icons-material/Notifications';
@@ -18,6 +17,8 @@ import { Badge, InputBase, alpha } from '@mui/material';
 import styled from '@emotion/styled';
 import SearchIcon from '@mui/icons-material/Search';
 import { useState } from 'react';
+import LogoutIcon from '@mui/icons-material/Logout';
+import LoginIcon from '@mui/icons-material/Login';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -140,16 +141,17 @@ const Header = ({ admin }) => {
           <Box sx={{ display: { md: 'flex' } }}>
             {
               isAuthenticated ?
-                <Button onClick={handleLogout} variant='outlined' color='inherit'>
-                  <Typography textAlign="center" color={"white"}>Logout</Typography>
-                </Button> :
-                <Typography textAlign="center">
-                  <Link to="/login" sx={{ textDecoration: "none", color: "white" }} >
-                    <Button variant='outlined' color='inherit'>
-                      Login
-                    </Button>
-                  </Link>
-                </Typography>
+                <Tooltip title="Logout">
+                  <IconButton onClick={handleLogout} variant='outlined' color='inherit' sx={{backgroundColor: "gray", p: 0.7}}>
+                    <LogoutIcon style={{fontSize: 20}}/>
+                  </IconButton></Tooltip> :
+                <Link to="/login" sx={{ textDecoration: "none", color: "white" }} >
+                  <Tooltip title="Login">
+                    <IconButton variant='outlined' color='inherit' sx={{backgroundColor: "gray", p: 0.7}}>
+                      <LoginIcon style={{fontSize: 20}} />
+                    </IconButton>
+                  </Tooltip>
+                </Link>
             }
           </Box>
 
