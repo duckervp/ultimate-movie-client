@@ -14,6 +14,5 @@ export const uploadFile = async (file) => {
     }
   });
 
-  console.log(data);
   return data;
 }

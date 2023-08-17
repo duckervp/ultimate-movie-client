@@ -111,7 +111,7 @@ const Movie = () => {
             <FavoriteIcon sx={{ color: "white", marginRight: 1 }} />
           </IconButton>
           <Typography color={"white"}>
-            Likes: {"12k"}
+            Rating: {movie?.rating ? movie?.rating + " points" : "N/A"}
           </Typography>
         </Box>
       </Card>

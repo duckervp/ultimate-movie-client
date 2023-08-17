@@ -77,7 +77,7 @@ const VideoPlayer = () => {
             movieEpisodes?.map(episode =>
               <Grid lg={0.5} key={episode?.id}>
                 <Link to={`/${slug}/play?episode=${episode?.name}`} sx={{ textDecoration: "none" }}>
-                  <Button size="small" variant="outlined" key={episode}
+                  <Button size="small" variant={episode?.id === currentEpisode?.id ? "contained" : "outlined"} key={episode}
                     sx={{ minWidth: "45px", paddingY: 1, margin: "2px" }}>
                     {episode?.name}
                   </Button>

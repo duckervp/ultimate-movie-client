@@ -57,6 +57,7 @@ const Home = () => {
 
   return (
     <Box sx={{ paddingY: 2 }} component={Container}>
+      {process.env.REACT_APP_BASE_URL}
       <Breadcrumb currentPage="Home" />
       <Accordion expanded={expanded === 'panel1'} onChange={handleChange('panel1')} sx={{ borderRadius: "5px" }}>
         <AccordionSummary
