@@ -63,10 +63,6 @@ const VideoPlayer = () => {
         height={"80vh"}
       />
 
-      <Typography variant="h4" sx={{ marginY: 2, fontSize: "25px" }} >
-        | {movie?.name}
-      </Typography>
-
       <Box sx={{ marginY: 2 }}>
         <Typography variant="h4" sx={{ marginBottom: 1, fontSize: "25px" }} >
           Episodes

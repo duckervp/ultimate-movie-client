@@ -17,6 +17,7 @@ import { isAdmin } from "../../jwtHelper";
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import LockResetIcon from '@mui/icons-material/LockReset';
+import UserHistory from "./UserHistory";
 
 const titleUp = (string) => {
   if (string.length === 0) {
@@ -101,7 +102,7 @@ const Profile = () => {
   return (
     <Box component={Container} sx={{ mt: 2 }}>
       <Grid container >
-        <Grid lg={3} sx={{ height: "80vh", padding: 1 }}>
+        <Grid lg={3.5} md={5} sx={{ height: "80vh", padding: 1 }}>
           <Box backgroundColor={"whitesmoke"} width={"100%"} height={"100%"} padding={2}>
             <Box sx={{ display: "flex", marginBottom: 1.5 }}>
               <CardMedia component="img" image={user?.avatarUrl || "https://cdn.pixabay.com/photo/2015/04/19/08/32/marguerite-729510__340.jpg"} alt="User avatar" sx={{ width: 125, height: 125, borderRadius: "10px" }} />
@@ -130,7 +131,7 @@ const Profile = () => {
               </Box>}
 
             <Divider sx={{ backgroundColor: "black", height: 2 }} />
-            <Box sx={{my: 2}}>
+            <Box sx={{ my: 2 }}>
               <Box sx={{ display: "flex", justifyContent: "space-between" }}>
                 <Typography sx={{ fontWeight: "bold" }}>
                   Information
@@ -149,29 +150,32 @@ const Profile = () => {
                 </Box>
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
-                <EmailIcon style={{fontSize: 20, marginRight: 5}} />
-                {user.email}
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
-                <CallIcon style={{fontSize: 20, marginRight: 5}} />
-                {user.phoneNumber}
-              </Box>
-              <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
-                <AssignmentIndIcon style={{fontSize: 20, marginRight: 5}} />
+                <AssignmentIndIcon style={{ fontSize: 20, marginRight: 5 }} />
                 {user.gender}
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
-                <MapIcon style={{fontSize: 20, marginRight: 5}} />
+                <MapIcon style={{ fontSize: 20, marginRight: 5 }} />
                 {user.address ? user.address : "N/A"}
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
+                <CallIcon style={{ fontSize: 20, marginRight: 5 }} />
+                {user.phoneNumber}
+              </Box>
+              <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
+                <EmailIcon style={{ fontSize: 20, marginRight: 5 }} />
+                {user.email}
               </Box>
             </Box>
 
           </Box>
         </Grid>
-        <Grid lg={9} sx={{ display: "flex", flexDirection: "column" }}>
+        <Grid lg={8.5} md={7} sx={{ display: "flex", flexDirection: "column" }}>
           <Box sx={{ height: "40vh", padding: 1 }}>
-            <Box backgroundColor={"whitesmoke"} width={"100%"} height={"100%"}>
-
+            <Box sx={{ backgroundColor: "whitesmoke", height: "100%", padding: 1 }}>
+              <Typography sx={{ fontWeight: "bold", mb: 1}}>
+                History
+              </Typography> 
+              <UserHistory />
             </Box>
           </Box>
           <Box sx={{ height: "40vh", padding: 1 }}>
