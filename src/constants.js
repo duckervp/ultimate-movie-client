@@ -4,4 +4,4 @@ export const Action = {
   EDIT: "edit",
 };
 
-export const BASE_URL = "https://41ec-27-72-100-51.ngrok-free.app/";
+export const BASE_URL = "https://clam-smiling-redbird.ngrok-free.app/";
