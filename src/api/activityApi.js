@@ -16,5 +16,36 @@ export const fetchUserHistory = async (params) => {
       authorization: `Bearer ${accessToken}`
     }
   });
+
+  return data;
+};
+
+export const addUserHistory = async (payload) => {
+  let url = `/activities/history`;
+
+  let accessToken = localStorage.getItem("accessToken");
+
+
+  const { data } = await Dxios.post(url, payload, accessToken ? {
+    headers: {
+      authorization: `Bearer ${accessToken}`
+    }
+  } : {});
+
+  return data;
+};
+
+export const addLoginActivity = async (payload) => {
+  let url = `/activities/login`;
+
+  let accessToken = localStorage.getItem("accessToken");
+
+
+  const { data } = await Dxios.post(url, payload, {
+    headers: {
+      authorization: `Bearer ${accessToken}`
+    }
+  });
+
   return data;
 };

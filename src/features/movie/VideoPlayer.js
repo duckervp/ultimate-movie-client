@@ -1,6 +1,5 @@
 import { Box, Typography, Button, Container } from "@mui/material"
 import Grid from "@mui/material/Unstable_Grid2"
-import ReactPlayer from "react-player";
 import { useParams, useSearchParams } from "react-router-dom";
 import * as React from "react";
 import { fetchMovieBySlug } from "../../api/movieApi";
@@ -9,6 +8,7 @@ import { sortEpisodeFnc } from "../../utils";
 import Loading from "../../components/Loading";
 import Breadcrumb from "../../components/Breadcumb";
 import NotFound from "../../components/NotFound";
+import Player from "./Player";
 
 const VideoPlayer = () => {
   const { slug } = useParams();
@@ -28,12 +28,11 @@ const VideoPlayer = () => {
       setMovie(movieData);
       setMovieEpisodes(movieData.episodes.sort(sortEpisodeFnc))
       const episode = searchParams.get("episode");
+      let currEp = movieData?.episodes?.[0];
       if (episode) {
-        const currEp = movieData?.episodes?.filter(ep => ep.name === episode)[0];
-        setCurrentEpisode(currEp);
-      } else {
-        setCurrentEpisode(movieData?.episodes?.get(0));
+        currEp = movieData?.episodes?.filter(ep => ep.name === episode)[0];
       }
+      setCurrentEpisode(currEp);
     }
     fetchMovie();
   }, [slug, searchParams]);
@@ -55,13 +54,7 @@ const VideoPlayer = () => {
         currentPage="Watch"
       />
 
-      <ReactPlayer
-        url={currentEpisode?.url}
-        muted={true}
-        controls={true}
-        width={"100%"}
-        height={"80vh"}
-      />
+      <Player movie={movie} currentEpisode={currentEpisode}/>
 
       <Box sx={{ marginY: 2 }}>
         <Typography variant="h4" sx={{ marginBottom: 1, fontSize: "25px" }} >

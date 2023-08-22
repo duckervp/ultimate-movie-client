@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import Dxios from "../../axios";
+import { addLoginActivity } from "../../api/activityApi";
 
 
 export const login = createAsyncThunk("user/login", async ({ username, password }) => {
@@ -128,6 +129,7 @@ export const userSlice = createSlice({
     }).addCase(fetchUser.fulfilled, (state, { payload }) => {
       const user = payload?.result;
       Object.keys(user).forEach(key => state[key] = user[key]);
+      addLoginActivity({"userId": user?.id});
     }).addCase(fetchUser.rejected, (state) => {
       state = initialState;
       toast.error("Fetch user failed!", {
