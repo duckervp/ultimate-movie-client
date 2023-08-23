@@ -16,17 +16,33 @@ import { fetchMovieBySlug } from "../../api/movieApi";
 import { getListGenre, sortEpisodeFnc } from "../../utils";
 import Loading from "../../components/Loading";
 import Breadcrumb from "../../components/Breadcumb";
+import RatingForm from "./RatingForm";
+import { useSelector } from "react-redux";
+import { fetchRating } from "../../api/activityApi";
 
 const Movie = () => {
   const { slug } = useParams();
 
   const [movie, setMovie] = useState({});
 
+  const user = useSelector(state => state.user);
+
   const [translateXValue, setTranslateXValue] = useState(0);
   const [characterViewed, setCharacterViewed] = useState(7);
 
   const [characterPrev, setCharacterPrev] = useState(false);
   const [characterNext, setCharacterNext] = useState(true);
+
+  const [ratingFormOpen, setRatingFormOpen] = useState(false);
+  const [rating, setRating] = useState();
+
+  const openRatingForm = () => {
+    setRatingFormOpen(true);
+  }
+
+  const closeRatingForm = () => {
+    setRatingFormOpen(false);
+  }
 
   useEffect(() => {
     const fetchMovie = async () => {
@@ -37,6 +53,23 @@ const Movie = () => {
     }
     fetchMovie();
   }, [slug])
+
+  useEffect(() => {
+    const getRating = async () => {
+      const params = { userId: user?.id, movieId: movie?.id }
+      const data = await fetchRating(params);
+
+      if (data?.result?.point) {
+        setRating(data?.result);
+      } else {
+        setRating({ point: 10 });
+      }
+    }
+
+    if (user?.id && movie?.id) {
+      getRating();
+    }
+  }, [user, movie])
 
   const handleSlideRight = (totalCharacter) => {
     if (characterViewed < totalCharacter) {
@@ -58,7 +91,7 @@ const Movie = () => {
     }
   }
 
-  if (!movie.episodes) {
+  if (!movie.episodes || !rating) {
     return <Loading />
   }
 
@@ -66,7 +99,7 @@ const Movie = () => {
     <Box component={Container} sx={{ paddingY: 2 }}>
       <Breadcrumb
         links={
-          [{link: "/", title: "Home"}]
+          [{ link: "/", title: "Home" }]
         }
         currentPage={movie?.name}
       />
@@ -107,11 +140,17 @@ const Movie = () => {
           </Typography>
         </Box>
         <Box sx={{ position: "absolute", top: "410px", left: "10px", display: "flex", backgroundColor: "black", padding: "5px 10px", borderRadius: "5px" }}>
-          <IconButton sx={{ padding: 0, margin: 0 }}>
-            <FavoriteIcon sx={{ color: "white", marginRight: 1 }} />
-          </IconButton>
+          {
+            user.id ?
+              <IconButton sx={{ padding: 0, margin: 0 }} onClick={openRatingForm}>
+                <FavoriteIcon sx={{ color: "deeppink", marginRight: 1 }} />
+              </IconButton> :
+              <IconButton sx={{ padding: 0, margin: 0 }}>
+                <FavoriteIcon sx={{ color: "white", marginRight: 1 }} />
+              </IconButton>
+          }
           <Typography color={"white"}>
-            Rating: {movie?.rating ? movie?.rating + " points" : "N/A"}
+            Rating: {movie?.rating ? Math.round(movie?.rating * 100) / 100  + " points" : "N/A"}
           </Typography>
         </Box>
       </Card>
@@ -204,6 +243,14 @@ const Movie = () => {
           }
         </Box>
       </Box>
+      <RatingForm
+        user={user}
+        movie={movie}
+        rating={rating}
+        setRating={setRating}
+        formOpen={ratingFormOpen}
+        handleCloseForm={closeRatingForm}
+      />
     </Box >
   );
 }

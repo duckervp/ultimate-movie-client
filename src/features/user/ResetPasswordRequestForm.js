@@ -15,7 +15,7 @@ const ResetPasswordRequestForm = () => {
       email: data.get('email')
     };
     try {
-      await dispatch(sendResetPasswordRequest(body));
+      await dispatch(sendResetPasswordRequest(body)).unwrap();
     } catch (error) { }
   };
 

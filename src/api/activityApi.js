@@ -49,3 +49,56 @@ export const addLoginActivity = async (payload) => {
 
   return data;
 };
+
+export const fetchRating = async (params) => {
+  let url = `/activities/rating`;
+  if (params) {
+    const { userId, movieId } = params;
+    if (userId) {
+      url += `?userId=${userId}&movieId=${movieId}`;
+    }
+  }
+
+  let accessToken = localStorage.getItem("accessToken");
+
+  const { data } = await Dxios.get(url, {
+    headers: {
+      authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  return data;
+};
+
+
+export const addRating = async (payload) => {
+  let url = `/activities/rating`;
+
+  let accessToken = localStorage.getItem("accessToken");
+
+
+  const { data } = await Dxios.post(url, payload, {
+    headers: {
+      authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  return data;
+};
+
+export const updateRating = async (ratingId, payload) => {
+  let url = `/activities/rating/${ratingId}`;
+
+  let accessToken = localStorage.getItem("accessToken");
+
+
+  const { data } = await Dxios.patch(url, payload, {
+    headers: {
+      authorization: `Bearer ${accessToken}`
+    }
+  });
+
+  return data;
+};
+
+

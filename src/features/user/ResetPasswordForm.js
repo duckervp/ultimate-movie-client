@@ -22,8 +22,6 @@ const ResetPasswordForm = () => {
 
     const data = new FormData(e.currentTarget);
 
-    console.log(data.get("password"));
-
     const body = {
       newPassword: data.get("password")
     };

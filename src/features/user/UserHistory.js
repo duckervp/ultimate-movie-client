@@ -26,10 +26,10 @@ const UserHistory = () => {
   }
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center" }} >
+    <Box sx={{ display: "flex", alignItems: "center", flexWrap: {xs: "wrap", md: "nowrap"} }} >
       {
         userHistory?.map(movie => (
-          <Card key={movie.id} sx={{ marginX: "5px", position: "relative", transition: "0.3s ease-in-out" }}>
+          <Card key={movie.id} sx={{ marginX: "5px", position: "relative", transition: "0.3s ease-in-out", mb: 1 }}>
             <CardMedia
               component="img"
               height="205"

@@ -29,7 +29,7 @@ export default function RegisterForm() {
       password: data.get('password'),
     };
     try {
-      await dispatch(register(body));
+      await dispatch(register(body)).unwrap();
       navigate("/user", { replace: true });
     } catch (error) { }
   };

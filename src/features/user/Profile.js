@@ -78,7 +78,7 @@ const Profile = () => {
       address: data.get('address')
     };
     try {
-      await dispatch(updateUser(body));
+      await dispatch(updateUser(body)).unwrap();
       handleCloseProfileForm();
     } catch (error) { }
   }
@@ -102,13 +102,22 @@ const Profile = () => {
   return (
     <Box component={Container} sx={{ mt: 2 }}>
       <Grid container >
-        <Grid lg={3.5} md={5} sx={{ height: "80vh", padding: 1 }}>
+        <Grid lg={3.5} md={5} xs={12} sx={{ height: "80vh", padding: 1 }}>
           <Box backgroundColor={"whitesmoke"} width={"100%"} height={"100%"} padding={2}>
-            <Box sx={{ display: "flex", marginBottom: 1.5 }}>
-              <CardMedia component="img" image={user?.avatarUrl || "https://cdn.pixabay.com/photo/2015/04/19/08/32/marguerite-729510__340.jpg"} alt="User avatar" sx={{ width: 125, height: 125, borderRadius: "10px" }} />
-              <Typography sx={{ marginLeft: 2, fontWeight: "bold" }}>
-                {titleUp(user.name)}
-              </Typography>
+            <Box sx={{ display: "flex", marginBottom: 1.5, justifyContent: "space-between" }}>
+              <CardMedia
+                component="img"
+                image={user?.avatarUrl || "https://cdn.pixabay.com/photo/2015/04/19/08/32/marguerite-729510__340.jpg"} alt="User avatar"
+                sx={{ width: 125, height: 125, borderRadius: "10px" }} />
+              <Box sx={{ display: "flex", flexDirection: "column", justifyContent: "space-evenly", alignItems: "center" }}>
+                <Typography sx={{ marginLeft: 2, fontWeight: "bold" }}>
+                  {titleUp(user?.name)}
+                </Typography>
+
+                <Typography sx={{ marginLeft: 2, fontWeight: "bold", background: "white", borderRadius: 5, padding: 1 }}>
+                  Level {user?.level || 0}
+                </Typography>
+              </Box>
             </Box>
 
             {isAdmin(accessToken) &&
@@ -118,7 +127,7 @@ const Profile = () => {
                 </Typography>
                 <Link to={"/admin"}
                   sx={{
-                    display: { xs: 'none', md: 'flex' },
+                    display: { md: 'flex' },
                     fontFamily: 'monospace',
                     letterSpacing: '.3rem',
                     color: 'inherit',
@@ -169,16 +178,16 @@ const Profile = () => {
 
           </Box>
         </Grid>
-        <Grid lg={8.5} md={7} sx={{ display: "flex", flexDirection: "column" }}>
-          <Box sx={{ height: "40vh", padding: 1 }}>
-            <Box sx={{ backgroundColor: "whitesmoke", height: "100%", padding: 1 }}>
-              <Typography sx={{ fontWeight: "bold", mb: 1}}>
-                History
-              </Typography> 
+        <Grid lg={8.5} md={7} xs={12} sx={{ display: "flex", flexDirection: "column" }}>
+          <Box sx={{ height: { lg: "40vh", md: "40vh" }, padding: 1 }}>
+            <Box sx={{ backgroundColor: "whitesmoke", height: "100%", padding: 2 }}>
+              <Typography sx={{ fontWeight: "bold", mb: 1 }}>
+                Watched Recently
+              </Typography>
               <UserHistory />
             </Box>
           </Box>
-          <Box sx={{ height: "40vh", padding: 1 }}>
+          <Box sx={{ height: { lg: "40vh", md: "40vh" }, padding: 1 }}>
             <Box backgroundColor={"whitesmoke"} width={"100%"} height={"100%"}>
 
             </Box>
