@@ -1,35 +1,41 @@
 import { Avatar, Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
 import { useDispatch, useSelector } from "react-redux";
-import { login } from "./userSlice";
 import { Link as RouterLink, Navigate, useNavigate } from "react-router-dom";
-import { isValidToken } from "../../jwtHelper";
 import SocialLogin from "./SocialLogin";
+import { useLoginMutation } from "./authApiSlice";
+import { setCredentials } from "./authSlice";
+import { useState } from "react";
+import Loading from "../../components/Loading";
 
 const LoginForm = () => {
-  const accessToken = useSelector(state => state.user.accessToken);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [login, { isLoading }] = useLoginMutation();
+  const [errMsg, setErrMsg] = useState();
 
   const handleSubmit = async e => {
     e.preventDefault();
-    
+
     const data = new FormData(e.currentTarget);
-    
+
     const body = {
-      username: data.get("username"),
-      password: data.get("password")
+      clientId: data.get("username"),
+      clientSecret: data.get("password")
     };
-    let success = true;
-    
+
     try {
-      await dispatch(login(body)).unwrap();
-    } catch (error) {
-      success = false;
-    }
-    
-    if (success) {
-      navigate("/user", { replace: true });
+      const data = await login(body).unwrap();
+      dispatch(setCredentials({ accessToken: data.access_token }));
+      // navigate("/user", { replace: true });
+    } catch (err) {
+      if (!err.originalStatus) {
+        setErrMsg("No Server Response");
+      } else if (err.originalStatus === 401) {
+        setErrMsg("Unauthorized");
+      } else {
+        setErrMsg("Login Failed");
+      }
     }
   }
 
@@ -101,12 +107,7 @@ const LoginForm = () => {
       </Box>
     </Box>
   )
-
-  if (isValidToken(accessToken)) {
-    return <Navigate to="/user" replace />;
-  } else {
-    return content;
-  }
+  return isLoading ? <Loading /> : content;
 }
 
 export default LoginForm;

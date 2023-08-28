@@ -5,23 +5,22 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { createTheme, ThemeProvider } from '@mui/material';
 import { Provider } from 'react-redux';
-import {persistor, store} from "./app/store"
-import { PersistGate } from 'redux-persist/integration/react';
-import { BrowserRouter } from 'react-router-dom';
+import { store } from "./app/store"
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 const theme = createTheme();
 root.render(
   // <React.StrictMode>
-    <Provider store={store} >
-      <PersistGate loading={null} persistor={persistor}>
+  <Provider store={store} >
+      <ThemeProvider theme={theme}>
         <BrowserRouter>
-          <ThemeProvider theme={theme}>
-            <App />
-          </ThemeProvider>
+          <Routes>
+            <Route path="/*" element={<App />} />
+          </Routes>
         </BrowserRouter>
-      </PersistGate>
-    </Provider>
+      </ThemeProvider>
+  </Provider>
   // </React.StrictMode>
 );
 
