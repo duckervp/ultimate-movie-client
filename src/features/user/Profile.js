@@ -18,8 +18,12 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import UserHistory from "./UserHistory";
+import { useGetUserQuery } from "./userApiSlice";
+import Loading from "../../components/Loading";
+import { selectCurrentUser } from "./authSlice";
 
 const titleUp = (string) => {
+  if (!string) return "";
   if (string.length === 0) {
     return string;
   }
@@ -43,8 +47,9 @@ const style = {
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const user = useSelector(state => state.user);
-  const accessToken = useSelector(state => state.user.accessToken);
+  const user = useSelector(selectCurrentUser);
+
+  const accessToken = "";
 
   const [profileFormOpen, setProfileFormOpen] = useState(false);
 
@@ -98,6 +103,8 @@ const Profile = () => {
       console.log(error);
     }
   }
+
+  if (!user) return <Loading />;
 
   return (
     <Box component={Container} sx={{ mt: 2 }}>

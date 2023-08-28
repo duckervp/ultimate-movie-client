@@ -7,11 +7,13 @@ import { useLoginMutation } from "./authApiSlice";
 import { setCredentials } from "./authSlice";
 import { useState } from "react";
 import Loading from "../../components/Loading";
+import { useGetUserQuery } from "./userApiSlice";
 
 const LoginForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [login, { isLoading }] = useLoginMutation();
+  // const [getUser] = useGetUserQuery();
   const [errMsg, setErrMsg] = useState();
 
   const handleSubmit = async e => {
@@ -27,7 +29,9 @@ const LoginForm = () => {
     try {
       const data = await login(body).unwrap();
       dispatch(setCredentials({ accessToken: data.access_token }));
-      // navigate("/user", { replace: true });
+      // const userData = await getUser();
+      // console.log(userData);
+      navigate("/", { replace: true });
     } catch (err) {
       if (!err.originalStatus) {
         setErrMsg("No Server Response");

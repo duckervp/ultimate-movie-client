@@ -19,6 +19,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useState } from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
+import { useGetUserQuery } from '../features/user/userApiSlice';
+import UserAvatar from './UserAvartar';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -63,17 +65,9 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 const Header = ({ admin }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const isAuthenticated = Boolean(useSelector(state => state.user.accessToken));
-  const user = useSelector(state => state.user);
+  
   const [searchValue, setSearchValue] = useState("");
-  const [fetchCount, setFetchCount] = useState(0);
 
-  React.useEffect(() => {
-    if (isAuthenticated && !user?.id && fetchCount === 0) {
-      dispatch(fetchUser());
-      setFetchCount(1);
-    }
-  }, [dispatch, user, fetchCount, isAuthenticated]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -140,7 +134,7 @@ const Header = ({ admin }) => {
 
           <Box sx={{ display: { md: 'flex' } }}>
             {
-              isAuthenticated ?
+              true ?
                 <Tooltip title="Logout">
                   <IconButton onClick={handleLogout} variant='outlined' color='inherit' sx={{backgroundColor: "gray", p: 0.7}}>
                     <LogoutIcon style={{fontSize: 20}}/>
@@ -167,15 +161,7 @@ const Header = ({ admin }) => {
             </IconButton>
           </Box>
 
-          <Box sx={{ flexGrow: 0 }}>
-            <Link to={"/user"} sx={{ textDecoration: "none", color: "black" }} >
-              <Tooltip title="Open your profile">
-                <IconButton sx={{ p: 0 }}>
-                  <Avatar alt={`${user?.name} avatar`} src={user?.avatarUrl} sx={{ width: "30px", height: "30px" }} />
-                </IconButton>
-              </Tooltip>
-            </Link>
-          </Box>
+          <UserAvatar />
         </Toolbar>
       </Container>
     </AppBar>
