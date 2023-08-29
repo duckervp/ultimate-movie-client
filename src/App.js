@@ -21,6 +21,8 @@ import ResetPasswordForm from './features/user/ResetPasswordForm';
 import NotFound from './components/NotFound';
 import { CssBaseline } from '@mui/material';
 import RequireAuth from './components/RequireAuth';
+import { Role } from './constants';
+import Unauthorized from './components/Unauthorized';
 
 function App() {
   return (
@@ -34,9 +36,6 @@ function App() {
             <Route index element={<Movie />} />
             <Route path="play" element={<VideoPlayer />} />
           </Route>
-          {/* <Route path="user">
-            <Route index element={<Private children={<Profile />} />} />
-          </Route> */}
           <Route element={<RequireAuth />}>
             <Route path='user' element={<Profile />} />
           </Route>
@@ -55,6 +54,7 @@ function App() {
         <Route path="/register" element={<RegisterForm />} />
         <Route path="/reset-password-request" element={<ResetPasswordRequestForm />} />
         <Route path="/reset-password" element={<ResetPasswordForm />} />
+        <Route path="/unauthorized" element={<Unauthorized />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
 

@@ -1,18 +1,18 @@
 import { Box, Button, Typography } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
-const NotFound = ({ subject }) => {
+const Unauthorized = () => {
   const navigate = useNavigate();
 
   return (
     <Box>
       <Box sx={{ background: "aliceblue", height: "40vh", pt: 7, pl: 10 }}>
         <Typography variant="h2">
-          {subject} Not Found
+          Unauthorized
         </Typography>
         <Box sx={{ ml: 0.45, mt: 3 }}>
           <Typography variant="body1">
-            The resource you requested does not exist.
+            You do not have access to the requested page.
           </Typography>
           <Box sx={{ mt: 3 }}>
             <Button onClick={() => navigate("/", { replace: true })} variant="contained" >Home</Button>
@@ -20,13 +20,10 @@ const NotFound = ({ subject }) => {
           </Box>
         </Box>
       </Box>
-      <Box sx={{ background: "steelblue", height: "60vh" }}>
-
-      </Box>
-
+      <Box sx={{ background: "lightgray", height: "60vh" }} />
     </Box>
 
   );
 }
 
-export default NotFound;
+export default Unauthorized;

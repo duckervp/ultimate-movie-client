@@ -5,13 +5,11 @@ import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
 import Tooltip from '@mui/material/Tooltip';
 import AdbIcon from '@mui/icons-material/Adb';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchUser, logout } from '../features/user/userSlice';
 import Link from './Link';
 import { Badge, InputBase, alpha } from '@mui/material';
 import styled from '@emotion/styled';
@@ -19,8 +17,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import { useState } from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
-import { useGetUserQuery } from '../features/user/userApiSlice';
 import UserAvatar from './UserAvartar';
+import { logout, selectCurrentUser } from '../features/user/authSlice';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -65,6 +63,7 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 const Header = ({ admin }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const user =  useSelector(selectCurrentUser);
   
   const [searchValue, setSearchValue] = useState("");
 
@@ -134,7 +133,7 @@ const Header = ({ admin }) => {
 
           <Box sx={{ display: { md: 'flex' } }}>
             {
-              true ?
+              user ?
                 <Tooltip title="Logout">
                   <IconButton onClick={handleLogout} variant='outlined' color='inherit' sx={{backgroundColor: "gray", p: 0.7}}>
                     <LogoutIcon style={{fontSize: 20}}/>
@@ -161,7 +160,7 @@ const Header = ({ admin }) => {
             </IconButton>
           </Box>
 
-          <UserAvatar />
+          <UserAvatar user={user} />
         </Toolbar>
       </Container>
     </AppBar>

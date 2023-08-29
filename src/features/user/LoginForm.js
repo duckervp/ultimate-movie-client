@@ -1,20 +1,20 @@
 import { Avatar, Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
 import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
-import { useDispatch, useSelector } from "react-redux";
-import { Link as RouterLink, Navigate, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
 import SocialLogin from "./SocialLogin";
 import { useLoginMutation } from "./authApiSlice";
-import { setCredentials } from "./authSlice";
-import { useState } from "react";
+import { setCredentials, setUser } from "./authSlice";
 import Loading from "../../components/Loading";
-import { useGetUserQuery } from "./userApiSlice";
+import jwt_decode from "jwt-decode";
+import { toast } from "react-toastify";
 
 const LoginForm = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = location.state?.from?.pathname || "/";
   const [login, { isLoading }] = useLoginMutation();
-  // const [getUser] = useGetUserQuery();
-  const [errMsg, setErrMsg] = useState();
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -22,24 +22,29 @@ const LoginForm = () => {
     const data = new FormData(e.currentTarget);
 
     const body = {
-      clientId: data.get("username"),
+      clientId: data.get("email"),
       clientSecret: data.get("password")
     };
 
     try {
       const data = await login(body).unwrap();
-      dispatch(setCredentials({ accessToken: data.access_token }));
-      // const userData = await getUser();
-      // console.log(userData);
-      navigate("/", { replace: true });
+      dispatch(setCredentials({ accessToken: data.access_token, role: data.scope }));
+      const { id, name, avt, sub } = jwt_decode(data.access_token);
+      dispatch(setUser({ id, name, email: sub, avatarUrl: avt }));
+      navigate(from, { replace: true });
     } catch (err) {
-      if (!err.originalStatus) {
-        setErrMsg("No Server Response");
-      } else if (err.originalStatus === 401) {
-        setErrMsg("Unauthorized");
+      const { code } = err.data;
+      let message = "";
+      if (!code) {
+        message = "No Server Response";
+      } else if (code === 401) {
+        message = "Unauthorized";
       } else {
-        setErrMsg("Login Failed");
+        message = "Login Failed";
       }
+      toast.error(message, {
+        position: toast.POSITION.TOP_RIGHT
+      });
     }
   }
 
@@ -65,13 +70,13 @@ const LoginForm = () => {
           </Typography>
           <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }} autoComplete="off">
             <TextField
-              margin="normal"
               required
               fullWidth
-              id="username"
-              label="Username"
-              name="username"
-              autoFocus
+              id="email"
+              label="Email"
+              name="email"
+              margin="normal"
+              autoComplete="email"
             />
             <TextField
               margin="normal"
@@ -111,7 +116,12 @@ const LoginForm = () => {
       </Box>
     </Box>
   )
-  return isLoading ? <Loading /> : content;
+
+  if (isLoading) {
+    return <Loading fullScreen />
+  }
+
+  return content;
 }
 
 export default LoginForm;

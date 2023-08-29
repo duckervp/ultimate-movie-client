@@ -2,21 +2,25 @@ import * as React from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-import { FormControl, FormLabel, Radio, RadioGroup } from '@mui/material';
 import { useDispatch } from 'react-redux';
-import { register } from './userSlice';
 import SocialLogin from './SocialLogin';
+import { useRegisterMutation } from './authApiSlice';
+import { toast } from 'react-toastify';
+import { setCredentials, setUser } from './authSlice';
+import Loading from '../../components/Loading';
+import jwt_decode from "jwt-decode";
 
 export default function RegisterForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [register, { isLoading }] = useRegisterMutation();
 
   const handleSubmit = async e => {
     e.preventDefault();
@@ -24,19 +28,35 @@ export default function RegisterForm() {
     const body = {
       name: data.get('name'),
       email: data.get('email'),
-      gender: data.get('gender'),
-      username: data.get('username'),
       password: data.get('password'),
     };
     try {
-      await dispatch(register(body)).unwrap();
-      navigate("/user", { replace: true });
-    } catch (error) { }
+      const data = await register(body).unwrap();
+      dispatch(setCredentials({ accessToken: data.access_token, role: data.scope }));
+      const { id, name, avt, sub } = jwt_decode(data.access_token);
+      dispatch(setUser({ id, name, email: sub, avatarUrl: avt }));
+      navigate("/", { replace: true });
+    } catch (err) {
+      const code= err.data?.code;
+      let message = "";
+      if (!code) {
+        message = "No Server Response";
+      } else if (code === 401) {
+        message = "Unauthorized";
+      } else {
+        message = "Register Failed";
+      }
+      toast.error(message, {
+        position: toast.POSITION.TOP_RIGHT
+      });
+    }
   };
 
+  if (isLoading) return <Loading fullScreen />
+
   return (
-    <Box sx={{ backgroundColor: "whitesmoke", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center"}}>
-      <Box sx={{maxWidth: 500}}>
+    <Box sx={{ backgroundColor: "whitesmoke", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <Box sx={{ maxWidth: 400 }}>
         <Box
           sx={{
             padding: "25px",
@@ -48,74 +68,41 @@ export default function RegisterForm() {
             mt: -10
           }}
         >
-          <Avatar sx={{ m: 1, bgcolor: 'secondary.main' }}>
+          <Avatar sx={{ mb: 1, bgcolor: 'secondary.main' }}>
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
             Sign up
           </Typography>
-          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 3 }}>
-            <Grid container spacing={2}>
-              <Grid container item xs={8} spacing={2}>
-                <Grid item xs={12}>
-                  <TextField
-                    autoComplete="name"
-                    name="name"
-                    required
-                    fullWidth
-                    id="name"
-                    label="Name"
-                    autoFocus
-                  />
-                </Grid>
-                <Grid item xs={12}>
-                  <TextField
-                    required
-                    fullWidth
-                    id="email"
-                    label="Email Address"
-                    name="email"
-                    autoComplete="email"
-                  />
-                </Grid>
-              </Grid>
-              <Grid item xs={3} sx={{ marginLeft: "auto" }}>
-                <FormControl>
-                  <FormLabel id="radio-gender-form">Gender</FormLabel>
-                  <RadioGroup
-                    aria-labelledby="radio-gender-form"
-                    defaultValue="FEMALE"
-                    name="gender"
-                  >
-                    <FormControlLabel value="FEMALE" control={<Radio />} label="Female" />
-                    <FormControlLabel value="MALE" control={<Radio />} label="Male" />
-                    <FormControlLabel value="OTHER" control={<Radio />} label="Other" />
-                  </RadioGroup>
-                </FormControl>
-              </Grid>
-
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  id="username"
-                  label="Username"
-                  name="username"
-                  autoComplete="username"
-                />
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <TextField
-                  required
-                  fullWidth
-                  name="password"
-                  label="Password"
-                  type="password"
-                  id="password"
-                  autoComplete="new-password"
-                />
-              </Grid>
-            </Grid>
+          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }} autoComplete='off'>
+            <TextField
+              autoComplete="off"
+              name="name"
+              required
+              fullWidth
+              id="name"
+              label="Name"
+              margin="normal"
+              autoFocus
+            />
+            <TextField
+              required
+              fullWidth
+              id="email"
+              label="Email"
+              name="email"
+              margin="normal"
+              autoComplete="off"
+            />
+            <TextField
+              required
+              fullWidth
+              margin="normal"
+              name="password"
+              label="Password"
+              type="password"
+              id="password"
+            />
             <Button
               type="submit"
               fullWidth

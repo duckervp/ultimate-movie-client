@@ -53,10 +53,24 @@ function FacebookCircularProgress(props) {
   );
 }
 
-export default function Loading({ type }) {
+const style = {
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  flexGrow: 1
+};
+
+const getStyle = (fullScreen) => {
+  if (fullScreen) {
+    style.height = "100vh";
+  }
+  return style;
+}
+
+export default function Loading({ type, fullScreen }) {
   if (!type || type === 'circle') {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', flexGrow: 1 }}>
+      <Box sx={getStyle(fullScreen)}>
         <FacebookCircularProgress />
       </Box>
     );

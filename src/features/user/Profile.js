@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { changePassword, updateUser } from "./userSlice";
 import { Box, Typography, CardMedia, Divider, IconButton, Modal, Tooltip } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
@@ -20,7 +20,8 @@ import LockResetIcon from '@mui/icons-material/LockReset';
 import UserHistory from "./UserHistory";
 import { useGetUserQuery } from "./userApiSlice";
 import Loading from "../../components/Loading";
-import { selectCurrentUser } from "./authSlice";
+import { setUser } from "./authSlice";
+import { toast } from "react-toastify";
 
 const titleUp = (string) => {
   if (!string) return "";
@@ -47,11 +48,31 @@ const style = {
 
 const Profile = () => {
   const dispatch = useDispatch();
-  const user = useSelector(selectCurrentUser);
-
-  const accessToken = "";
 
   const [profileFormOpen, setProfileFormOpen] = useState(false);
+  const [passwordFormOpen, setPasswordFormOpen] = useState(false);
+
+  const {
+    data: user,
+    isLoading,
+    isSuccess,
+    isError,
+    error
+  } = useGetUserQuery();
+
+  useEffect(() => {
+    if (isSuccess && user){
+      dispatch(setUser({...user}))
+    }
+  }, [isSuccess, user, dispatch]);
+
+  useEffect(() => {
+    if (isError) {
+      toast.error(error, {
+        position: toast.POSITION.TOP_RIGHT
+      });
+    }
+  }, [isError, error])
 
   const handleOpenProfileForm = () => {
     setProfileFormOpen(true);
@@ -61,7 +82,6 @@ const Profile = () => {
     setProfileFormOpen(false);
   };
 
-  const [passwordFormOpen, setPasswordFormOpen] = useState(false);
 
   const handleOpenPasswordForm = () => {
     setPasswordFormOpen(true);
@@ -104,7 +124,9 @@ const Profile = () => {
     }
   }
 
-  if (!user) return <Loading />;
+  if (isLoading) {
+    return <Loading />
+  }
 
   return (
     <Box component={Container} sx={{ mt: 2 }}>
@@ -127,7 +149,7 @@ const Profile = () => {
               </Box>
             </Box>
 
-            {isAdmin(accessToken) &&
+            {isAdmin("") &&
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                 <Typography sx={{ fontWeight: "bold" }}>
                   Administrator

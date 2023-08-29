@@ -4,4 +4,9 @@ export const Action = {
   EDIT: "edit",
 };
 
+export const Role = {
+  ADMIN: "ADMIN",
+  USER: "USER",
+}
+
 export const BASE_URL = "https://clam-smiling-redbird.ngrok-free.app/";

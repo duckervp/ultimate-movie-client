@@ -5,6 +5,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
     getUser: builder.query({
       query: () => ({ url: `/users/` }),
       keepUnusedDataFor: 5,
+      transformResponse: (response) => response.result, 
     }),
   })
 })

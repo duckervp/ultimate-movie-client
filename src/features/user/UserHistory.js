@@ -1,34 +1,37 @@
-import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { fetchUserHistory } from "../../api/activityApi";
 import Loading from "../../components/Loading";
 import { Box, Card, CardMedia, IconButton, Tooltip, Typography } from "@mui/material";
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import Link from "../../components/Link";
+import { useGetUserHistoryQuery } from "./historyApiSlice";
+import { selectCurrentUser } from "./authSlice";
+import { toast } from "react-toastify";
 
 const UserHistory = () => {
-  const user = useSelector(state => state.user);
-  const [userHistory, setUserHistory] = useState([]);
+  const user = useSelector(selectCurrentUser);
 
-  useEffect(() => {
-    const findUserHistory = async () => {
-      const params = { userId: user?.id }
-      const data = await fetchUserHistory(params);
-      setUserHistory(data?.results);
-    }
+  const {
+    data: userHistory,
+    isLoading,
+    isError,
+    error
+  } = useGetUserHistoryQuery(user.id);
 
-    findUserHistory();
-  }, [user]);
-
-  if (!userHistory) {
+  if (isLoading) {
     return <Loading />
   }
 
+  if (isError) {
+    toast.error(error, {
+      position: toast.POSITION.TOP_RIGHT
+    });
+  }
+
   return (
-    <Box sx={{ display: "flex", alignItems: "center", flexWrap: {xs: "wrap", md: "nowrap"} }} >
+    <Box sx={{ display: "flex", alignItems: "center", flexWrap: { xs: "wrap", md: "nowrap" } }} >
       {
-        userHistory?.map(movie => (
+        userHistory.map(movie => (
           <Card key={movie.id} sx={{ marginX: "5px", position: "relative", transition: "0.3s ease-in-out", mb: 1 }}>
             <CardMedia
               component="img"
@@ -68,20 +71,36 @@ const UserHistory = () => {
               bottom: "0",
               color: "white",
             }}>
-              {movie?.lastWatchedEpisode && <Link to={`/${movie?.slug}/play?episode=${movie?.lastWatchedEpisode?.name}`} sx={{ textDecoration: "none", color: "white" }} >
-                <Tooltip title={"Continue watching Ep ".concat(movie?.lastWatchedEpisode?.name)}>
-                  <IconButton variant='outlined' color='inherit' sx={{ backgroundColor: "black", p: 0.7, mr: 1, "&:hover": { background: "gray" } }}>
-                    <PlayArrowIcon style={{ fontSize: 20 }} />
-                  </IconButton>
-                </Tooltip>
-              </Link>}
-              {movie?.nextEpisode && <Link to={`/${movie?.slug}/play?episode=${movie?.nextEpisode?.name}`} sx={{ textDecoration: "none", color: "white" }} >
-                <Tooltip title={"Next Ep ".concat(movie?.nextEpisode?.name)}>
-                  <IconButton variant='outlined' color='inherit' sx={{ backgroundColor: "black", p: 0.7, "&:hover": { background: "gray" } }}>
-                    <SkipNextIcon style={{ fontSize: 20 }} />
-                  </IconButton>
-                </Tooltip>
-              </Link>}
+              {
+                movie?.lastWatchedEpisode
+                && <Link
+                  to={`/${movie?.slug}/play?episode=${movie?.lastWatchedEpisode?.name}`}
+                  sx={{ textDecoration: "none", color: "white" }} >
+                  <Tooltip title={"Continue watching Ep ".concat(movie?.lastWatchedEpisode?.name)}>
+                    <IconButton
+                      variant='outlined'
+                      color='inherit'
+                      sx={{ backgroundColor: "black", p: 0.7, mr: 1, "&:hover": { background: "gray" } }}>
+                      <PlayArrowIcon style={{ fontSize: 20 }} />
+                    </IconButton>
+                  </Tooltip>
+                </Link>
+              }
+              {
+                movie?.nextEpisode
+                && <Link
+                  to={`/${movie?.slug}/play?episode=${movie?.nextEpisode?.name}`}
+                  sx={{ textDecoration: "none", color: "white" }} >
+                  <Tooltip title={"Next Ep ".concat(movie?.nextEpisode?.name)}>
+                    <IconButton
+                      variant='outlined'
+                      color='inherit'
+                      sx={{ backgroundColor: "black", p: 0.7, "&:hover": { background: "gray" } }}>
+                      <SkipNextIcon style={{ fontSize: 20 }} />
+                    </IconButton>
+                  </Tooltip>
+                </Link>
+              }
             </Box>
           </Card>
         ))
