@@ -13,7 +13,7 @@ const OAuth2LoginRedirect = () => {
     const { scope, avt, id, name, sub } = jwt_decode(accessToken);
     dispatch(setCredentials({ accessToken, role: scope ? scope[0] : null }));
     dispatch(setUser({id, name, email: sub, avatarUrl: avt }));
-    return <Navigate to={"/"} />
+    return <Navigate to={"/"} replace />
   }
   else {
     if (searchParams.get("error")) {
@@ -21,7 +21,7 @@ const OAuth2LoginRedirect = () => {
         position: toast.POSITION.TOP_RIGHT
       });
     }
-    return <Navigate to={"/login"} />
+    return <Navigate to={"/login"} replace />
   }
 }
 

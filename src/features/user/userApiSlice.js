@@ -7,9 +7,17 @@ export const userApiSlice = apiSlice.injectEndpoints({
       keepUnusedDataFor: 5,
       transformResponse: (response) => response.result, 
     }),
+    updateUser: builder.mutation({
+      query: ({id, payload}) => ({
+        url: `/users/${id}`,
+        method: "PATCH",
+        body: {...payload}
+      }),
+    })
   })
 })
 
 export const {
-  useGetUserQuery
+  useGetUserQuery,
+  useUpdateUserMutation
 } = userApiSlice;

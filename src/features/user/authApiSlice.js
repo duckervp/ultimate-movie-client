@@ -16,7 +16,13 @@ export const authApiSlice = apiSlice.injectEndpoints({
         body: {...payload},
       }),
     }),
+    refresh: builder.mutation({
+      query: () => ({
+        url: "/users/auth/refresh",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation } = authApiSlice;
+export const { useLoginMutation, useRegisterMutation, useRefreshMutation } = authApiSlice;

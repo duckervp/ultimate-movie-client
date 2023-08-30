@@ -10,3 +10,4 @@ export const Role = {
 }
 
 export const BASE_URL = "https://clam-smiling-redbird.ngrok-free.app/";
+// export const BASE_URL = "http://localhost:8762/";

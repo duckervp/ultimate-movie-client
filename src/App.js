@@ -23,6 +23,7 @@ import { CssBaseline } from '@mui/material';
 import RequireAuth from './components/RequireAuth';
 import { Role } from './constants';
 import Unauthorized from './components/Unauthorized';
+import PersistedLogin from './components/PersistedLogin';
 
 function App() {
   return (
@@ -36,8 +37,10 @@ function App() {
             <Route index element={<Movie />} />
             <Route path="play" element={<VideoPlayer />} />
           </Route>
-          <Route element={<RequireAuth />}>
-            <Route path='user' element={<Profile />} />
+          <Route element={<PersistedLogin />}>
+            <Route element={<RequireAuth />}>
+              <Route path='user' element={<Profile />} />
+            </Route>
           </Route>
         </Route>
         <Route path="admin" element={<Layout admin />}>

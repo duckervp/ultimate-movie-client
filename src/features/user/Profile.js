@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { changePassword, updateUser } from "./userSlice";
 import { Box, Typography, CardMedia, Divider, IconButton, Modal, Tooltip } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
@@ -18,9 +18,9 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import UserHistory from "./UserHistory";
-import { useGetUserQuery } from "./userApiSlice";
+import { useGetUserQuery, useUpdateUserMutation } from "./userApiSlice";
 import Loading from "../../components/Loading";
-import { setUser } from "./authSlice";
+import { selectCurrentUser, setUser } from "./authSlice";
 import { toast } from "react-toastify";
 
 const titleUp = (string) => {
@@ -52,27 +52,33 @@ const Profile = () => {
   const [profileFormOpen, setProfileFormOpen] = useState(false);
   const [passwordFormOpen, setPasswordFormOpen] = useState(false);
 
+  const user = useSelector(selectCurrentUser);
+  const [gender, setGender] = useState();
+
   const {
-    data: user,
+    data: fetchedUser,
     isLoading,
     isSuccess,
     isError,
     error
   } = useGetUserQuery();
 
+  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
+
   useEffect(() => {
-    if (isSuccess && user){
-      dispatch(setUser({...user}))
+    if (isSuccess && fetchedUser) {
+      dispatch(setUser({ ...fetchedUser }))
+      setGender(fetchedUser.gender);
     }
-  }, [isSuccess, user, dispatch]);
+  }, [isSuccess, fetchedUser, dispatch]);
 
   useEffect(() => {
     if (isError) {
-      toast.error(error, {
+      toast.error(error.data?.message || "Unexpected error.", {
         position: toast.POSITION.TOP_RIGHT
       });
     }
-  }, [isError, error])
+  }, [isError, error, dispatch])
 
   const handleOpenProfileForm = () => {
     setProfileFormOpen(true);
@@ -91,21 +97,41 @@ const Profile = () => {
     setPasswordFormOpen(false);
   };
 
+  const handleGenderRadioChange = (event) => {
+    setGender(event.target.value);
+  };
+
   const handleProfileFormSubmit = async (e) => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-    const body = {
-      id: user?.id,
+    const payload = {
       name: data.get('name'),
       email: data.get('email'),
-      gender: data.get('gender'),
+      gender,
       phoneNumber: data.get('phoneNumber'),
       address: data.get('address')
     };
     try {
-      await dispatch(updateUser(body)).unwrap();
+      const data = await updateUser({ id: user?.id, payload }).unwrap();
+      const updatedUser = data.result;
+      dispatch(setUser({ ...updatedUser }));
       handleCloseProfileForm();
-    } catch (error) { }
+    } catch (err) {
+      const code = err.data?.code;
+      let message = "";
+      if (!code) {
+        message = "No Server Response";
+      } else if (code === 401) {
+        message = "Unauthorized";
+      } else if (code === 400) {
+        message = err.data?.message;
+      } else {
+        message = "Unexpected Error";
+      }
+      toast.error(message, {
+        position: toast.POSITION.TOP_RIGHT
+      });
+    }
   }
 
   const handlePasswordFormSubmit = async (e) => {
@@ -243,10 +269,10 @@ const Profile = () => {
             </Typography>
             <Box component="form" noValidate sx={{ mt: 3 }} onSubmit={handleProfileFormSubmit}>
               <Grid container spacing={2}>
-                <Grid container item xs={8} spacing={2}>
-                  <Grid item xs={12}>
+                <Grid container xs={8} spacing={2}>
+                  <Grid xs={12}>
                     <TextField
-                      autoComplete="name"
+                      autoComplete="off"
                       name="name"
                       required
                       fullWidth
@@ -256,7 +282,7 @@ const Profile = () => {
                       autoFocus
                     />
                   </Grid>
-                  <Grid item xs={12}>
+                  <Grid xs={12}>
                     <TextField
                       required
                       fullWidth
@@ -264,16 +290,18 @@ const Profile = () => {
                       label="Phone"
                       name="phoneNumber"
                       defaultValue={user?.phoneNumber}
+                      autoComplete="off"
                     />
                   </Grid>
                 </Grid>
-                <Grid item xs={3} sx={{ marginLeft: "auto" }}>
+                <Grid xs={3} sx={{ marginLeft: "auto" }}>
                   <FormControl>
                     <FormLabel id="radio-gender-form">Gender</FormLabel>
                     <RadioGroup
                       aria-labelledby="radio-gender-form"
-                      defaultValue={user?.gender}
                       name="gender"
+                      value={gender}
+                      onChange={handleGenderRadioChange}
                     >
                       <FormControlLabel value="FEMALE" control={<Radio />} label="Female" />
                       <FormControlLabel value="MALE" control={<Radio />} label="Male" />
@@ -282,7 +310,7 @@ const Profile = () => {
                   </FormControl>
                 </Grid>
 
-                <Grid item xs={12}>
+                <Grid xs={12}>
                   <TextField
                     required
                     fullWidth
@@ -290,10 +318,10 @@ const Profile = () => {
                     label="Email Address"
                     name="email"
                     defaultValue={user?.email}
-                    autoComplete="email"
+                    autoComplete="off"
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid xs={12}>
                   <TextField
                     required
                     fullWidth
@@ -301,6 +329,7 @@ const Profile = () => {
                     label="Address"
                     id="address"
                     defaultValue={user?.address}
+                    autoComplete="off"
                   />
                 </Grid>
               </Grid>

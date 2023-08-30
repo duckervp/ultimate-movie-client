@@ -21,9 +21,14 @@ const LoginForm = () => {
 
     const data = new FormData(e.currentTarget);
 
+    // const body = {
+    //   clientId: data.get("email"),
+    //   clientSecret: data.get("password")
+    // };
+
     const body = {
-      clientId: data.get("email"),
-      clientSecret: data.get("password")
+      clientId: "duc@mail.com",
+      clientSecret: "tran12345"
     };
 
     try {
@@ -33,7 +38,7 @@ const LoginForm = () => {
       dispatch(setUser({ id, name, email: sub, avatarUrl: avt }));
       navigate(from, { replace: true });
     } catch (err) {
-      const { code } = err.data;
+      const code = err.data?.code;
       let message = "";
       if (!code) {
         message = "No Server Response";
