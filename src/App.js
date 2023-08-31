@@ -2,7 +2,6 @@ import './App.css';
 import { Route, Routes } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import Private from './components/Private';
 import Layout from './components/Layout';
 import LoginForm from './features/user/LoginForm';
 import Profile from './features/user/Profile';
@@ -43,15 +42,20 @@ function App() {
             </Route>
           </Route>
         </Route>
-        <Route path="admin" element={<Layout admin />}>
-          <Route index element={<Private admin children={<AdminManagement />} />} />
-          <Route path="movie" element={<Private admin children={<EnhancedTable />} />} />
-          <Route path="edit-movie/:slug" element={<Private admin children={<NewMovie />} />} />
-          <Route path="create-movie" element={<Private admin children={<NewMovie />} />} />
-          <Route path="genre" element={<Private admin children={<GenreEnhancedTable />} />} />
-          <Route path="character" element={<Private admin children={<AdminManagement />} />} />
-          <Route path="producer" element={<Private admin children={<ProducerEnhancedTable />} />} />
+        <Route element={<PersistedLogin />}>
+          <Route element={<RequireAuth allowedRole={Role.ADMIN} />}>
+            <Route path="admin" element={<Layout admin />} >
+              <Route index element={<AdminManagement />} />
+              <Route path="movie" element={<EnhancedTable />} />
+              <Route path="edit-movie/:slug" element={<NewMovie />} />
+              <Route path="create-movie" element={<NewMovie />} />
+              <Route path="genre" element={<GenreEnhancedTable />} />
+              <Route path="character" element={<AdminManagement />}/>
+              <Route path="producer" element={<ProducerEnhancedTable />} />
+            </Route>
+          </Route>
         </Route>
+
         <Route path="/login" element={<LoginForm />} />
         <Route path="/login/oauth2/redirect" element={<OAuth2LoginRedirect />} />
         <Route path="/register" element={<RegisterForm />} />

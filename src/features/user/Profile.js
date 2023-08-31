@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { changePassword, updateUser } from "./userSlice";
 import { Box, Typography, CardMedia, Divider, IconButton, Modal, Tooltip } from "@mui/material";
 import Grid from "@mui/material/Unstable_Grid2";
 import AssignmentIndIcon from '@mui/icons-material/AssignmentInd';
@@ -13,15 +12,17 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Container from '@mui/material/Container';
 import { FormControl, FormLabel, Radio, RadioGroup } from '@mui/material';
 import Link from "../../components/Link";
-import { isAdmin } from "../../jwtHelper";
 import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import UserHistory from "./UserHistory";
 import { useGetUserQuery, useUpdateUserMutation } from "./userApiSlice";
 import Loading from "../../components/Loading";
-import { selectCurrentUser, setUser } from "./authSlice";
+import { selectCurrentRole, selectCurrentUser, setUser } from "./authSlice";
 import { toast } from "react-toastify";
+import { handleError } from "../../utils";
+import { Role } from "../../constants";
+import { useUpdatePasswordMutation } from "./authApiSlice";
 
 const titleUp = (string) => {
   if (!string) return "";
@@ -53,6 +54,7 @@ const Profile = () => {
   const [passwordFormOpen, setPasswordFormOpen] = useState(false);
 
   const user = useSelector(selectCurrentUser);
+  const role = useSelector(selectCurrentRole);
   const [gender, setGender] = useState();
 
   const {
@@ -61,9 +63,11 @@ const Profile = () => {
     isSuccess,
     isError,
     error
-  } = useGetUserQuery();
+  } = useGetUserQuery(user?.id);
 
-  const [updateUser, { isLoading: isUpdating }] = useUpdateUserMutation();
+  const [updateUser] = useUpdateUserMutation();
+
+  const [updatePassword] = useUpdatePasswordMutation();
 
   useEffect(() => {
     if (isSuccess && fetchedUser) {
@@ -117,20 +121,7 @@ const Profile = () => {
       dispatch(setUser({ ...updatedUser }));
       handleCloseProfileForm();
     } catch (err) {
-      const code = err.data?.code;
-      let message = "";
-      if (!code) {
-        message = "No Server Response";
-      } else if (code === 401) {
-        message = "Unauthorized";
-      } else if (code === 400) {
-        message = err.data?.message;
-      } else {
-        message = "Unexpected Error";
-      }
-      toast.error(message, {
-        position: toast.POSITION.TOP_RIGHT
-      });
+      handleError(err);
     }
   }
 
@@ -143,10 +134,11 @@ const Profile = () => {
       newPassword: data.get('newPassword')
     };
     try {
-      await dispatch(changePassword(body)).unwrap();
+      console.log(body);
+      await updatePassword({...body}).unwrap();
       handleClosePasswordForm();
     } catch (error) {
-      console.log(error);
+      handleError(error);
     }
   }
 
@@ -175,7 +167,7 @@ const Profile = () => {
               </Box>
             </Box>
 
-            {isAdmin("") &&
+            { role === Role.ADMIN &&
               <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
                 <Typography sx={{ fontWeight: "bold" }}>
                   Administrator
@@ -215,19 +207,19 @@ const Profile = () => {
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
                 <AssignmentIndIcon style={{ fontSize: 20, marginRight: 5 }} />
-                {user.gender}
+                {user?.gender}
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
                 <MapIcon style={{ fontSize: 20, marginRight: 5 }} />
-                {user.address ? user.address : "N/A"}
+                {user?.address ? user.address : "N/A"}
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
                 <CallIcon style={{ fontSize: 20, marginRight: 5 }} />
-                {user.phoneNumber}
+                {user?.phoneNumber}
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", marginY: 1 }}>
                 <EmailIcon style={{ fontSize: 20, marginRight: 5 }} />
-                {user.email}
+                {user?.email}
               </Box>
             </Box>
 

@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { selectCurrentUser, setCredentials, setUser } from "../features/user/authSlice";
 import jwt_decode from "jwt-decode";
-import { useRefreshMutation } from "../features/user/authApiSlice";
+import { useRefreshMutation } from "../features/user/authApiNoCredSlice";
 
 const PersistedLogin = () => {
   const [isLoading, setIsLoading] = useState(true);

@@ -1,22 +1,30 @@
 import { Avatar, Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
-import { useDispatch } from "react-redux";
-import { sendResetPasswordRequest } from "./userSlice";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Link as RouterLink } from "react-router-dom";
 import SocialLogin from "./SocialLogin";
+import { handleError } from "../../utils";
+import { useDispatch } from "react-redux";
+import { useEffect } from "react";
+import { logout } from "./authSlice";
+import { useRequestResetPasswordMutation } from "./authApiNoCredSlice";
 
 const ResetPasswordRequestForm = () => {
   const dispatch = useDispatch();
+  const [requestResetPassword] = useRequestResetPasswordMutation();
+
+  useEffect(() => {
+    dispatch(logout());
+  }, [dispatch]);
 
   const handleSubmit = async e => {
     e.preventDefault();
     const data = new FormData(e.currentTarget);
-    const body = {
-      email: data.get('email')
-    };
+    const email = data.get('email');
     try {
-      await dispatch(sendResetPasswordRequest(body)).unwrap();
-    } catch (error) { }
+      await requestResetPassword(email).unwrap();
+    } catch (error) { 
+      handleError(error);
+    }
   };
 
   return (

@@ -2,27 +2,16 @@ import { apiSlice } from "../../app/api/apiSlice";
 
 export const authApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    login: builder.mutation({
-      query: (credentials) => ({
-        url: "/users/auth/login",
-        method: "POST",
-        body: { ...credentials },
-      }),
-    }),
-    register: builder.mutation({
+    updatePassword: builder.mutation({
       query: (payload) => ({
-        url: "/users/auth/register",
-        method: "POST",
-        body: {...payload},
-      }),
-    }),
-    refresh: builder.mutation({
-      query: () => ({
-        url: "/users/auth/refresh",
-        method: "GET",
+        url: `/users/auth/change-password`,
+        method: "PATCH",
+        body: {...payload}
       }),
     }),
   }),
 });
 
-export const { useLoginMutation, useRegisterMutation, useRefreshMutation } = authApiSlice;
+export const { 
+  useUpdatePasswordMutation,
+} = authApiSlice;

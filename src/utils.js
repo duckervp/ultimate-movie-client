@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { BASE_URL } from "./constants"
 
 export const getFileUrl = (filePath) => {
@@ -8,7 +9,7 @@ export const getFileUrl = (filePath) => {
     filePath = filePath.slice(1);
   }
   return BASE_URL.concat(filePath);
-} 
+}
 
 /**
  * Get array items that in the objArr1 and not in objArr2
@@ -75,4 +76,31 @@ export const sortEpisodeFnc = (ep1, ep2) => {
     return -1;
   }
   return 0;
+}
+
+export const handleError = (err, defaultMessage) => {
+  const code = err.data?.code;
+  let message;
+  if (!code) {
+    message = "No Server Response";
+  } else if (code === 401) {
+    message = "Unauthorized";
+  } else if (code === 400) {
+    message = err.data?.message || defaultMessage;
+  } else {
+    message = defaultMessage;
+  }
+  showErrorMessage(message || "Unexpected Error");
+}
+
+export const showSuccessMessage = (message) => {
+  toast.success(message, {
+    position: toast.POSITION.TOP_RIGHT
+  });
+}
+
+export const showErrorMessage = (message) => {
+  toast.error(message, {
+    position: toast.POSITION.TOP_RIGHT
+  });
 }

@@ -3,11 +3,11 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
 import { useDispatch } from "react-redux";
 import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
 import SocialLogin from "./SocialLogin";
-import { useLoginMutation } from "./authApiSlice";
+import { useLoginMutation } from "./authApiNoCredSlice";
 import { setCredentials, setUser } from "./authSlice";
 import Loading from "../../components/Loading";
 import jwt_decode from "jwt-decode";
-import { toast } from "react-toastify";
+import { handleError } from "../../utils";
 
 const LoginForm = () => {
   const dispatch = useDispatch();
@@ -21,14 +21,9 @@ const LoginForm = () => {
 
     const data = new FormData(e.currentTarget);
 
-    // const body = {
-    //   clientId: data.get("email"),
-    //   clientSecret: data.get("password")
-    // };
-
     const body = {
-      clientId: "duc@mail.com",
-      clientSecret: "tran12345"
+      clientId: data.get("email"),
+      clientSecret: data.get("password")
     };
 
     try {
@@ -38,18 +33,7 @@ const LoginForm = () => {
       dispatch(setUser({ id, name, email: sub, avatarUrl: avt }));
       navigate(from, { replace: true });
     } catch (err) {
-      const code = err.data?.code;
-      let message = "";
-      if (!code) {
-        message = "No Server Response";
-      } else if (code === 401) {
-        message = "Unauthorized";
-      } else {
-        message = "Login Failed";
-      }
-      toast.error(message, {
-        position: toast.POSITION.TOP_RIGHT
-      });
+      handleError(err, "Login Failed");
     }
   }
 

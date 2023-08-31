@@ -10,11 +10,11 @@ import Typography from '@mui/material/Typography';
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useDispatch } from 'react-redux';
 import SocialLogin from './SocialLogin';
-import { useRegisterMutation } from './authApiSlice';
-import { toast } from 'react-toastify';
+import { useRegisterMutation } from './authApiNoCredSlice';
 import { setCredentials, setUser } from './authSlice';
 import Loading from '../../components/Loading';
 import jwt_decode from "jwt-decode";
+import { handleError } from '../../utils';
 
 export default function RegisterForm() {
   const dispatch = useDispatch();
@@ -37,18 +37,7 @@ export default function RegisterForm() {
       dispatch(setUser({ id, name, email: sub, avatarUrl: avt }));
       navigate("/", { replace: true });
     } catch (err) {
-      const code= err.data?.code;
-      let message = "";
-      if (!code) {
-        message = "No Server Response";
-      } else if (code === 401) {
-        message = "Unauthorized";
-      } else {
-        message = "Register Failed";
-      }
-      toast.error(message, {
-        position: toast.POSITION.TOP_RIGHT
-      });
+      handleError(err, "Register Failed");
     }
   };
 

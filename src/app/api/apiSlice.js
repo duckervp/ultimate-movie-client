@@ -7,8 +7,8 @@ const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
   prepareHeaders: (headers, { getState }) => {
     headers.set("ngrok-skip-browser-warning", true);
+    headers.set("Content-Type", "application/json");
     const token = getState().auth.token;
-    console.log(token);
     if (token) {
       headers.set("Authorization", `Bearer ${token}`)
     }
@@ -21,6 +21,7 @@ const baseQueryWithNoAuth = fetchBaseQuery({
   baseUrl: BASE_URL,
   prepareHeaders: (headers) => {
     headers.set("ngrok-skip-browser-warning", true);
+    headers.set("Content-Type", "application/json");
     return headers;
   }
 });
@@ -43,11 +44,13 @@ const baseQueryWithReauth = async (args, api, extraOptions) => {
 }
 
 export const apiSlice = createApi({
+  reducerPath: "api",
   baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({}),
 });
 
 export const noAuthApiSlice = createApi({
+  reducerPath: "noAuthApi",
   baseQuery: baseQueryWithNoAuth,
   endpoints: (builder) =>( {}),
 });

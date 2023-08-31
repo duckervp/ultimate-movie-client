@@ -1,17 +1,15 @@
 import { Avatar, Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
-import { useDispatch, useSelector } from "react-redux";
-import { resetPassword } from "./userSlice";
-import { Link as RouterLink, Navigate, useNavigate, useSearchParams } from "react-router-dom";
-import { isValidToken } from "../../jwtHelper";
+import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
+import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
 import SocialLogin from "./SocialLogin";
 import NotFound from "../../components/NotFound";
+import { useResetPasswordMutation } from "./authApiNoCredSlice";
+import { handleError, showSuccessMessage } from "../../utils";
 
 const ResetPasswordForm = () => {
-  const accessToken = useSelector(state => state.user.accessToken);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const [resetPassword] = useResetPasswordMutation();
 
   if (!searchParams?.get("token")) {
     return <NotFound />
@@ -19,28 +17,20 @@ const ResetPasswordForm = () => {
 
   const handleSubmit = async e => {
     e.preventDefault();
-
     const data = new FormData(e.currentTarget);
-
-    const body = {
-      newPassword: data.get("password")
-    };
-
-    let success = true;
 
     const payload = {
       token: searchParams?.get("token"),
-      body
+      newPassword: data.get("password")
     }
 
     try {
-      await dispatch(resetPassword(payload)).unwrap();
-    } catch (error) {
-      success = false;
-    }
-
-    if (success) {
+      await resetPassword(payload).unwrap();
+      showSuccessMessage("Reset Password Successfully");
       navigate("/login", { replace: true });
+    } catch (error) {
+      handleError(error);
+      navigate("/reset-password-request", { replace: true });
     }
   }
 
@@ -101,11 +91,7 @@ const ResetPasswordForm = () => {
     </Box>
   )
 
-  if (isValidToken(accessToken)) {
-    return <Navigate to="/user" replace />;
-  } else {
-    return content;
-  }
+  return content;
 }
 
 export default ResetPasswordForm;
