@@ -1,13 +1,15 @@
 import React from "react";
 import ReactPlayer from "react-player";
-import { addUserHistory } from "../../api/activityApi";
 import { useSelector } from "react-redux";
+import { useAddUserHistoryMutation } from "./slice/historyApiSlice";
 
 const Player = ({movie, currentEpisode}) => {
 
   const user = useSelector(state => state.user);
 
   const [apiTimeout, setApiTimeout] = React.useState(null);
+
+  const [addUserHistory] = useAddUserHistoryMutation();
 
   React.useEffect(() => {
     // Function to make the API call
@@ -26,7 +28,7 @@ const Player = ({movie, currentEpisode}) => {
         clearTimeout(timeoutId);
       }
     };
-  }, [movie, currentEpisode, user]); // Empty dependency array to ensure the effect runs only once
+  }, [movie, currentEpisode, user, addUserHistory]); // Empty dependency array to ensure the effect runs only once
 
   React.useEffect(() => {
     // Handle the beforeunload event to cancel the API call

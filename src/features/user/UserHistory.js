@@ -4,8 +4,8 @@ import { Box, Card, CardMedia, IconButton, Tooltip, Typography } from "@mui/mate
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import SkipNextIcon from '@mui/icons-material/SkipNext';
 import Link from "../../components/Link";
-import { useGetUserHistoryQuery } from "./historyApiSlice";
-import { selectCurrentUser } from "./authSlice";
+import { useGetUserHistoryQuery } from "./slice/historyApiSlice";
+import { selectCurrentUser } from "../auth/slice/authSlice";
 import { toast } from "react-toastify";
 
 const UserHistory = () => {

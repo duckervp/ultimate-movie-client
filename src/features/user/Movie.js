@@ -12,20 +12,18 @@ import WorkHistoryIcon from '@mui/icons-material/WorkHistory';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import { useEffect, useState } from "react";
 import Link from "../../components/Link";
-import { fetchMovieBySlug } from "../../api/movieApi";
 import { getListGenre, sortEpisodeFnc } from "../../utils";
-import Loading from "../../components/Loading";
 import Breadcrumb from "../../components/Breadcumb";
 import RatingForm from "./RatingForm";
 import { useSelector } from "react-redux";
-import { fetchRating } from "../../api/activityApi";
+import { useFetchMovieQuery } from "./slice/movieApiNoCredSlice";
+import { selectCurrentUser } from "../auth/slice/authSlice";
+import { useGetMovieRatingQuery } from "./slice/ratingApiSlice";
 
 const Movie = () => {
   const { slug } = useParams();
 
-  const [movie, setMovie] = useState({});
-
-  const user = useSelector(state => state.user);
+  const user = useSelector(selectCurrentUser);
 
   const [translateXValue, setTranslateXValue] = useState(0);
   const [characterViewed, setCharacterViewed] = useState(7);
@@ -36,6 +34,10 @@ const Movie = () => {
   const [ratingFormOpen, setRatingFormOpen] = useState(false);
   const [rating, setRating] = useState();
 
+  const [movieGenres, setMovieGenres] = useState([]);
+  const [movieEpisodes, setMovieEpisodes] = useState([]);
+  const [movieCharacters, setMovieCharacters] = useState([]);
+
   const openRatingForm = () => {
     setRatingFormOpen(true);
   }
@@ -44,32 +46,27 @@ const Movie = () => {
     setRatingFormOpen(false);
   }
 
-  useEffect(() => {
-    const fetchMovie = async () => {
-      const data = await fetchMovieBySlug(slug);
-      if (data?.code === 200) {
-        setMovie(data?.result);
-      }
-    }
-    fetchMovie();
-  }, [slug])
+  const {
+    data: movie,
+  } = useFetchMovieQuery(slug);
+
+  const {
+    data: movieRating,
+  } = useGetMovieRatingQuery({userId: user?.id, movieId: movie?.id}, { skip: !user?.id || !movie?.id });
 
   useEffect(() => {
-    const getRating = async () => {
-      const params = { userId: user?.id, movieId: movie?.id }
-      const data = await fetchRating(params);
+    setMovieGenres(movie?.genres || []);
+    setMovieEpisodes(movie?.episodes.slice().sort(sortEpisodeFnc) || []);
+    setMovieCharacters(movie?.characters || []);
+  }, [movie]);
 
-      if (data?.result?.point) {
-        setRating(data?.result);
-      } else {
-        setRating({ point: 10 });
-      }
+  useEffect(() => {
+    if (movieRating?.point !== null) {
+      setRating(movieRating);
+    } else {
+      setRating({ point: 10 });
     }
-
-    if (user?.id && movie?.id) {
-      getRating();
-    }
-  }, [user, movie])
+  }, [movieRating])
 
   const handleSlideRight = (totalCharacter) => {
     if (characterViewed < totalCharacter) {
@@ -91,9 +88,6 @@ const Movie = () => {
     }
   }
 
-  if (!movie.episodes || !rating) {
-    return <Loading />
-  }
 
   return (
     <Box component={Container} sx={{ paddingY: 2 }}>
@@ -105,7 +99,7 @@ const Movie = () => {
       />
       <Card sx={{ position: "relative" }}>
         <CardActionArea>
-          <Link to={`/${slug}/play?episode=${movie.episodes.sort(sortEpisodeFnc)[0]?.name}`}>
+          <Link to={`/${slug}/play?episode=${movieEpisodes.at(0)?.name}`}>
             <CardMedia
               component="img"
               height="500"
@@ -124,7 +118,7 @@ const Movie = () => {
         <Box sx={{ position: "absolute", top: "110px", left: "10px", display: "flex", backgroundColor: "black", padding: "5px 10px", borderRadius: "5px" }}>
           <GridViewIcon sx={{ color: "white", marginRight: 1 }} />
           <Typography color={"white"}>
-            Genres: {movie?.genres ? getListGenre(movie.genres) ? getListGenre(movie.genres) : "N/A" : "N/A"}
+            Genres: {movieGenres ? getListGenre(movieGenres) ? getListGenre(movieGenres) : "N/A" : "N/A"}
           </Typography>
         </Box>
         <Box sx={{ position: "absolute", top: "210px", left: "10px", display: "flex", backgroundColor: "black", padding: "5px 10px", borderRadius: "5px" }}>
@@ -141,7 +135,7 @@ const Movie = () => {
         </Box>
         <Box sx={{ position: "absolute", top: "410px", left: "10px", display: "flex", backgroundColor: "black", padding: "5px 10px", borderRadius: "5px" }}>
           {
-            user.id ?
+            user?.id ?
               <IconButton sx={{ padding: 0, margin: 0 }} onClick={openRatingForm}>
                 <FavoriteIcon sx={{ color: "deeppink", marginRight: 1 }} />
               </IconButton> :
@@ -150,7 +144,7 @@ const Movie = () => {
               </IconButton>
           }
           <Typography color={"white"}>
-            Rating: {movie?.rating ? Math.round(movie?.rating * 100) / 100  + " points" : "N/A"}
+            Rating: {movie?.rating ? Math.round(movie?.rating * 100) / 100 + " points" : "N/A"}
           </Typography>
         </Box>
       </Card>
@@ -170,7 +164,7 @@ const Movie = () => {
             Characters
           </Typography>
           {
-            movie?.characters?.length >= characterViewed ?
+            movieCharacters?.length >= characterViewed ?
               <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", position: "relative" }}>
                 {characterPrev && <IconButton sx={{ position: "absolute", left: "10px", zIndex: 1, color: "white", backgroundColor: "black" }} onClick={handleSlideLeft}>
                   <ArrowBackIosNewIcon />
@@ -178,7 +172,7 @@ const Movie = () => {
 
                 <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", overflowX: "hidden" }} >
                   {
-                    movie?.characters?.map(character => (
+                    movieCharacters?.map(character => (
                       <Card key={character.id} sx={{ minWidth: 154.6, width: 154.6, marginX: "5px", position: "relative", transition: "0.3s ease-in-out" }} style={{ transform: `translateX(${translateXValue}px)` }}>
                         <CardActionArea>
                           {/* <Link to={"/"}> */}
@@ -205,14 +199,14 @@ const Movie = () => {
                       </Card>
                     ))
                   }
-                  {characterNext && <IconButton sx={{ position: "absolute", right: "10px", zIndex: 1, color: "white", backgroundColor: "black" }} onClick={() => handleSlideRight(movie?.characters?.length)}>
+                  {characterNext && <IconButton sx={{ position: "absolute", right: "10px", zIndex: 1, color: "white", backgroundColor: "black" }} onClick={() => handleSlideRight(movieCharacters?.length)}>
                     <ArrowForwardIosIcon />
                   </IconButton>}
                 </Box>
               </Box> :
               <Box sx={{ display: "flex", alignItems: "center" }} >
                 {
-                  movie?.characters?.map(character => (
+                  movieCharacters?.map(character => (
                     <Card key={character?.id} sx={{ minWidth: 154.6, width: 154.6, marginX: "5px", position: "relative", transition: "0.3s ease-in-out" }} style={{ transform: `translateX(${translateXValue}px)` }}>
                       <CardActionArea>
                         {/* <Link to={"/"}> */}
@@ -243,14 +237,15 @@ const Movie = () => {
           }
         </Box>
       </Box>
-      <RatingForm
+      {console.log(rating)}
+      {(user && movie && rating) && <RatingForm
         user={user}
         movie={movie}
         rating={rating}
         setRating={setRating}
         formOpen={ratingFormOpen}
         handleCloseForm={closeRatingForm}
-      />
+      />}
     </Box >
   );
 }

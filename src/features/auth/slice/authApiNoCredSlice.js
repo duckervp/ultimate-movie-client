@@ -1,4 +1,4 @@
-import { noAuthApiSlice } from "../../app/api/apiSlice";
+import { noAuthApiSlice } from "../../../app/api/apiSlice";
 
 export const authApiSlice = noAuthApiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -25,7 +25,7 @@ export const authApiSlice = noAuthApiSlice.injectEndpoints({
     requestResetPassword: builder.mutation({
       query: (email) => ({
         url: `users/auth/reset-password-request?email=${email}`,
-        method: "GET"
+        method: "GET",
       }),
     }),
     resetPassword: builder.mutation({

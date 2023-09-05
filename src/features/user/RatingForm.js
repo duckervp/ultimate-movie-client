@@ -2,7 +2,8 @@ import { Box, Button, Container, Modal, Typography } from "@mui/material";
 import LoveRating from "../../components/LoveRating";
 import Loading from "../../components/Loading";
 import { useState } from "react";
-import { addRating, updateRating } from "../../api/activityApi";
+import { useAddMovieRatingMutation, useUpdateMovieRatingMutation } from "./slice/ratingApiSlice";
+import { handleError } from "../../utils";
 
 const style = {
   position: 'absolute',
@@ -23,17 +24,25 @@ const RatingForm = ({ user, movie, rating, setRating, formOpen, handleCloseForm 
 
   const [point, setPoint] = useState(rating?.point);
 
+  const [addMovieRating] = useAddMovieRatingMutation();
+
+  const [updateMovieRating] = useUpdateMovieRatingMutation();
+
   const handleRatingSubmit = async (e) => {
     e.preventDefault();
-    const payload = {userId: user?.id, movieId: movie?.id, point}
-    if (rating?.id) {
-      const data = await updateRating(rating?.id, payload);
-      setRating(data?.result)
-    } else {
-      const data = await addRating(payload);
-      setRating(data?.result)
+    const payload = { userId: user?.id, movieId: movie?.id, point }
+    try {
+      if (rating?.id) {
+        const { result } = await updateMovieRating({ ratingId: rating?.id, payload }).unwrap();
+        setRating(result);
+      } else {
+        const { result } = await addMovieRating(payload).unwrap();
+        setRating(result);
+      }
+      handleCloseForm();
+    } catch (err) {
+      handleError(err);
     }
-    handleCloseForm();
   }
 
   if (!point) {

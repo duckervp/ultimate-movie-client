@@ -5,8 +5,8 @@ import SocialLogin from "./SocialLogin";
 import { handleError } from "../../utils";
 import { useDispatch } from "react-redux";
 import { useEffect } from "react";
-import { logout } from "./authSlice";
-import { useRequestResetPasswordMutation } from "./authApiNoCredSlice";
+import { logout } from "./slice/authSlice";
+import { useRequestResetPasswordMutation } from "./slice/authApiNoCredSlice";
 
 const ResetPasswordRequestForm = () => {
   const dispatch = useDispatch();

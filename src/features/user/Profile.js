@@ -16,13 +16,13 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import LockResetIcon from '@mui/icons-material/LockReset';
 import UserHistory from "./UserHistory";
-import { useGetUserQuery, useUpdateUserMutation } from "./userApiSlice";
+import { useGetUserQuery, useUpdateUserMutation } from "./slice/userApiSlice";
 import Loading from "../../components/Loading";
-import { selectCurrentRole, selectCurrentUser, setUser } from "./authSlice";
+import { selectCurrentRole, selectCurrentUser, setUser } from "../auth/slice/authSlice";
 import { toast } from "react-toastify";
 import { handleError } from "../../utils";
 import { Role } from "../../constants";
-import { useUpdatePasswordMutation } from "./authApiSlice";
+import { useUpdatePasswordMutation } from "../auth/slice/authApiSlice";
 
 const titleUp = (string) => {
   if (!string) return "";

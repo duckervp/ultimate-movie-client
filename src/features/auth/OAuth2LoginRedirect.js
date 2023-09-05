@@ -2,7 +2,7 @@ import { Navigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { toast } from "react-toastify";
 import jwt_decode from "jwt-decode";
-import { setCredentials, setUser } from "./authSlice";
+import { setCredentials, setUser } from "./slice/authSlice";
 
 const OAuth2LoginRedirect = () => {
   const [searchParams] = useSearchParams();

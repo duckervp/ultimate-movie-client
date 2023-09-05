@@ -2,43 +2,37 @@ import { Accordion, AccordionDetails, AccordionSummary, Box, Button, Container, 
 import Grid from "@mui/material/Unstable_Grid2";
 import MovieCard from "./MovieCard";
 import { useEffect, useState } from "react";
-import { fetchAllMovies } from "../../api/movieApi";
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { fetchAllGenres } from "../../api/genreApi";
 import Link from "../../components/Link";
 import Loading from "../../components/Loading";
 import Breadcrumb from "../../components/Breadcumb";
+import { useFetchAllGenresQuery } from "./slice/genreApiNoCredSlice";
+import { useFetchAllMoviesQuery } from "./slice/movieApiNoCredSlice";
 
 const Home = () => {
   const [searchParams] = useSearchParams();
+  const pageNo = searchParams.get("page") || 1;
+  const pageSize = 15;
+  const name = searchParams.get("name");
+  const genre = searchParams.get("genre");
   const navigate = useNavigate();
 
   const [movies, setMovies] = useState([]);
-  const [pageSize, setPageSize] = useState(15);
   const [totalElements, setTotalElements] = useState(0);
-  const [genres, setGenres] = useState([]);
+
+  const {
+    data: genres,
+  } = useFetchAllGenresQuery();
+
+  const {
+    data: movieData,
+  } = useFetchAllMoviesQuery({ pageNo, pageSize, name, genre });
 
   useEffect(() => {
-    const fetchGenres = async () => {
-      const data = await fetchAllGenres();
-      setGenres(data?.results);
-    }
-
-    fetchGenres();
-  }, []);
-
-  useEffect(() => {
-    const fetchMovies = async () => {
-      const params = { pageNo: searchParams.get("page") || 1, pageSize, name: searchParams.get("name"), genre: searchParams.get("genre") };
-      const data = await fetchAllMovies(params);
-      setMovies(data?.results);
-      setPageSize(data?.pageSize);
-      setTotalElements(data?.totalElements);
-    }
-
-    fetchMovies();
-  }, [pageSize, searchParams]);
+    setMovies(movieData?.results);
+    setTotalElements(movieData?.totalElements);
+  }, [movieData]);
 
   const handlePageChange = (_, value) => {
     searchParams.set("page", value);

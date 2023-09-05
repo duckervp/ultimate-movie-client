@@ -3,7 +3,7 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import { Link as RouterLink, useNavigate, useSearchParams } from "react-router-dom";
 import SocialLogin from "./SocialLogin";
 import NotFound from "../../components/NotFound";
-import { useResetPasswordMutation } from "./authApiNoCredSlice";
+import { useResetPasswordMutation } from "./slice/authApiNoCredSlice";
 import { handleError, showSuccessMessage } from "../../utils";
 
 const ResetPasswordForm = () => {

@@ -18,7 +18,7 @@ import { useState } from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
 import UserAvatar from './UserAvartar';
-import { logout, selectCurrentUser } from '../features/user/authSlice';
+import { logout, selectCurrentUser } from '../features/auth/slice/authSlice';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',

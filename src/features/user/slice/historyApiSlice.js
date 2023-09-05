@@ -1,4 +1,4 @@
-import { apiSlice } from "../../app/api/apiSlice";
+import { apiSlice } from "../../../app/api/apiSlice";
 
 export const historyApiSlice = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -6,9 +6,17 @@ export const historyApiSlice = apiSlice.injectEndpoints({
       query: (userId) => `/activities/history?userId=${userId}`,
       transformResponse: (response) => response.results,
     }),
+    addUserHistory: builder.mutation({
+      query: (payload) => ({
+        url: "/activities/history",
+        method: "POST",
+        body: {...payload},
+      }),
+    }),
   }),
 });
 
 export const {
-  useGetUserHistoryQuery
+  useGetUserHistoryQuery,
+  useAddUserHistoryMutation,
 } = historyApiSlice;

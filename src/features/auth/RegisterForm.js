@@ -1,43 +1,49 @@
-import { Avatar, Box, Button, Grid, Link, TextField, Typography } from "@mui/material";
-import LockOutlinedIcon from "@mui/icons-material/LockOutlined"
-import { useDispatch } from "react-redux";
-import { Link as RouterLink, useNavigate, useLocation } from "react-router-dom";
-import SocialLogin from "./SocialLogin";
-import { useLoginMutation } from "./authApiNoCredSlice";
-import { setCredentials, setUser } from "./authSlice";
-import Loading from "../../components/Loading";
+import * as React from 'react';
+import Avatar from '@mui/material/Avatar';
+import Button from '@mui/material/Button';
+import TextField from '@mui/material/TextField';
+import Link from '@mui/material/Link';
+import Grid from '@mui/material/Grid';
+import Box from '@mui/material/Box';
+import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
+import Typography from '@mui/material/Typography';
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { useDispatch } from 'react-redux';
+import SocialLogin from './SocialLogin';
+import { useRegisterMutation } from './slice/authApiNoCredSlice';
+import { setCredentials, setUser } from './slice/authSlice';
+import Loading from '../../components/Loading';
 import jwt_decode from "jwt-decode";
-import { handleError } from "../../utils";
+import { handleError } from '../../utils';
 
-const LoginForm = () => {
+export default function RegisterForm() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const location = useLocation();
-  const from = location.state?.from?.pathname || "/";
-  const [login, { isLoading }] = useLoginMutation();
+
+  const [register, { isLoading }] = useRegisterMutation();
 
   const handleSubmit = async e => {
     e.preventDefault();
-
     const data = new FormData(e.currentTarget);
-
     const body = {
-      clientId: data.get("email"),
-      clientSecret: data.get("password")
+      name: data.get('name'),
+      email: data.get('email'),
+      password: data.get('password'),
     };
-
     try {
-      const data = await login(body).unwrap();
+      const data = await register(body).unwrap();
       dispatch(setCredentials({ accessToken: data.access_token, role: data.scope }));
       const { id, name, avt, sub } = jwt_decode(data.access_token);
       dispatch(setUser({ id, name, email: sub, avatarUrl: avt }));
-      navigate(from, { replace: true });
+      navigate("/", { replace: true });
     } catch (err) {
-      handleError(err, "Login Failed");
+      handleError(err, "Register Failed");
     }
-  }
+  };
 
-  const content = (
+  if (isLoading) return <Loading fullScreen />
+
+  return (
     <Box sx={{ backgroundColor: "whitesmoke", height: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <Box sx={{ maxWidth: 400 }}>
         <Box
@@ -55,9 +61,19 @@ const LoginForm = () => {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign in
+            Sign up
           </Typography>
-          <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }} autoComplete="off">
+          <Box component="form" noValidate onSubmit={handleSubmit} sx={{ mt: 1 }} autoComplete='off'>
+            <TextField
+              autoComplete="off"
+              name="name"
+              required
+              fullWidth
+              id="name"
+              label="Name"
+              margin="normal"
+              autoFocus
+            />
             <TextField
               required
               fullWidth
@@ -65,12 +81,12 @@ const LoginForm = () => {
               label="Email"
               name="email"
               margin="normal"
-              autoComplete="email"
+              autoComplete="off"
             />
             <TextField
-              margin="normal"
               required
               fullWidth
+              margin="normal"
               name="password"
               label="Password"
               type="password"
@@ -82,35 +98,24 @@ const LoginForm = () => {
               variant="contained"
               sx={{ mt: 3, mb: 2 }}
             >
-              Sign In
+              Sign Up
             </Button>
             <Grid container>
               <Grid item xs sx={{ textAlign: "left" }}>
-                <Link component={RouterLink} to="/reset-password-request" variant="body2">
-                  Forgot password?
+                <Link component={RouterLink} to="/" variant="body2">
+                  {"Back to Home"}
                 </Link>
               </Grid>
               <Grid item>
-                <Link component={RouterLink} to="/register" variant="body2">
-                  {"Sign Up"}
+                <Link component={RouterLink} to="/login" variant="body2">
+                  Sign in
                 </Link>
               </Grid>
             </Grid>
             <SocialLogin />
-            <Link component={RouterLink} to="/" variant="body2" sx={{ mt: 2, display: "inline-block" }}>
-              {"Back to Home"}
-            </Link>
           </Box>
         </Box>
       </Box>
     </Box>
-  )
-
-  if (isLoading) {
-    return <Loading fullScreen />
-  }
-
-  return content;
+  );
 }
-
-export default LoginForm;
