@@ -5,7 +5,7 @@ import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import dayjs from 'dayjs';
 import FileUploader from '../../components/FileUploader';
-
+import Loading from '../../components/Loading';
 
 const COUNTRY = [
   { name: "Vietnam", value: "VN" },
@@ -17,6 +17,8 @@ const COUNTRY = [
 export default function MovieForm(props) {
   const { movie, setMovie, createNew } = props;
 
+  console.log(movie);
+
   const handleTextInputChange = (event) => {
     const newMovie = { ...movie };
     newMovie[event.target.name] = event.target.value;
@@ -24,6 +26,7 @@ export default function MovieForm(props) {
   };
 
   const handleReleaseYearInputChange = (newValue) => {
+    console.log(newValue);
     setMovie({ ...movie, releaseYear: newValue.$y });
   };
 
@@ -39,16 +42,10 @@ export default function MovieForm(props) {
     setMovie({ ...movie, posterUrl: url });
   }
 
-  React.useEffect(() => {
-    if (createNew) {
-      setMovie({ ...movie, releaseYear: (new Date()).getFullYear() });
-    }
-  }, [movie, setMovie, createNew]);
-
-
-  if (!createNew && !movie.name) {
-    return "LOADING..";
+  if (!createNew && !movie?.name) {
+    return <Loading />
   }
+
   return (
     <React.Fragment>
       <Box>
@@ -57,7 +54,7 @@ export default function MovieForm(props) {
           id="movieName"
           name="name"
           label="Name"
-          defaultValue={movie.name}
+          defaultValue={movie?.name}
           fullWidth
           sx={{ my: 1 }}
           onChange={handleTextInputChange}
@@ -109,7 +106,7 @@ export default function MovieForm(props) {
               views={['year']}
               label="Release Year"
               openTo="year"
-              value={movie?.releaseYear ? dayjs(`${movie?.releaseYear}-01-01`) :  dayjs(new Date())}
+              value={movie?.releaseYear ? dayjs(`${movie?.releaseYear}-01-01`) : dayjs(new Date())}
               onChange={(newValue) => handleReleaseYearInputChange(newValue)}
               sx={{ minWidth: 200 }}
             />

@@ -51,7 +51,7 @@ export default function CharacterForm(props) {
         autoComplete='off'
       />
 
-      <FileUploader name="avatar" url={formState.avatarUrl}  setUrl={setUrl} label="Avatar"/>
+      <FileUploader name="avatar" url={formState.avatarUrl}  setUrl={setUrl} label="Avatar" loader="linear"/>
 
       <TextField
         required

@@ -48,9 +48,9 @@ function App() {
               <Route index element={<AdminManagement />} />
               <Route path="movie" element={<EnhancedTable />} />
               <Route path="edit-movie/:slug" element={<NewMovie />} />
-              <Route path="create-movie" element={<NewMovie />} />
+              <Route path="create-movie" element={<NewMovie createNew />} />
               <Route path="genre" element={<GenreEnhancedTable />} />
-              <Route path="character" element={<AdminManagement />}/>
+              <Route path="character" element={<AdminManagement />} />
               <Route path="producer" element={<ProducerEnhancedTable />} />
             </Route>
           </Route>

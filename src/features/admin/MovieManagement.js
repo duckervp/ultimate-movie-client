@@ -9,7 +9,6 @@ import Paper from '@mui/material/Paper';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Switch from '@mui/material/Switch';
-import { deleteMovies, fetchAllMovies } from "../../api/movieApi";
 import { FormControl, InputLabel, NativeSelect, Pagination } from '@mui/material';
 import EnhancedTableToolbar from '../../components/EnhancedTableToolbar';
 import EnhancedTableHead from '../../components/EnhancedTableHead';
@@ -45,6 +44,7 @@ function getComparator(order, orderBy) {
 // only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
 // with exampleArray.slice().sort(exampleComparator)
 function stableSort(array, comparator) {
+  array = !array ? [] : array;
   const stabilizedThis = array.map((el, index) => [el, index]);
   stabilizedThis.sort((a, b) => {
     const order = comparator(a[0], b[0]);
@@ -245,6 +245,10 @@ export default function EnhancedTable() {
 
   if (!searchParams.get("page")) {
     searchParams.append("page", 1);
+    return <Loading />;
+  }
+
+  if (!movies) {
     return <Loading />;
   }
 

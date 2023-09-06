@@ -104,3 +104,7 @@ export const showErrorMessage = (message) => {
     position: toast.POSITION.TOP_RIGHT
   });
 }
+
+export const arrayToCommaSeparatedString = (array) => {
+  return array.reduce((a, b) => "".concat(a).concat(",").concat(b), "").slice(1);
+} 

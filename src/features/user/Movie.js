@@ -52,7 +52,7 @@ const Movie = () => {
 
   const {
     data: movieRating,
-  } = useGetMovieRatingQuery({userId: user?.id, movieId: movie?.id}, { skip: !user?.id || !movie?.id });
+  } = useGetMovieRatingQuery({ userId: user?.id, movieId: movie?.id }, { skip: !user?.id || !movie?.id });
 
   useEffect(() => {
     setMovieGenres(movie?.genres || []);

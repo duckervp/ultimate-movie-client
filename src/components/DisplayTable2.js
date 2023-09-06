@@ -93,7 +93,7 @@ const DisplayTable2 = (props) => {
           <Button onClick={handleAddData} variant="outlined" endIcon={<AddCircleOutlineIcon />} sx={{ py: 1.8, px: 3 }}>Add</Button>
         </Box>}
         <Box sx={getSelectionBtnFlexCss2}>
-          { selection && <Box component={"span"} sx={{ mr: 1, fontSize: "small", fontWeight: "bold" }}>OR</Box>}
+          {selection && <Box component={"span"} sx={{ mr: 1, fontSize: "small", fontWeight: "bold" }}>OR</Box>}
           <Button variant="outlined" onClick={() => setOptionalDialogOpen(true)} endIcon={<AddBoxIcon />} sx={{ py: 1.8, px: 3 }}>Create</Button>
         </Box>
       </Box>
@@ -107,7 +107,7 @@ const DisplayTable2 = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {displayRows.sort((a, b) => {
+            {displayRows?.sort((a, b) => {
               if (a[config.columns.at(config.keyIndex).field] > b[config.columns.at(config.keyIndex).field]) {
                 return 1;
               } else if (a[config.columns.at(config.keyIndex).field] < b[config.columns.at(config.keyIndex).field]) {

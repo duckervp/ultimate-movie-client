@@ -7,7 +7,6 @@ const baseQuery = fetchBaseQuery({
   baseUrl: BASE_URL,
   prepareHeaders: (headers, { getState }) => {
     headers.set("ngrok-skip-browser-warning", true);
-    headers.set("Content-Type", "application/json");
     const token = getState().auth.token;
     if (token) {
       headers.set("Authorization", `Bearer ${token}`)
@@ -21,7 +20,6 @@ const baseQueryWithNoAuth = fetchBaseQuery({
   baseUrl: BASE_URL,
   prepareHeaders: (headers) => {
     headers.set("ngrok-skip-browser-warning", true);
-    headers.set("Content-Type", "application/json");
     return headers;
   }
 });

@@ -26,6 +26,7 @@ const UserHistory = () => {
     toast.error(error, {
       position: toast.POSITION.TOP_RIGHT
     });
+    return <></>;
   }
 
   return (

@@ -14,11 +14,11 @@ const DisplayTable = (props) => {
   };
 
   const handleAddData = () => {
-    setDisplayRows([...displayRows].concat(dataRows.filter(row => row?.name === selectedRow && !displayRows.includes(row))))
+    setDisplayRows(displayRows.slice().concat(dataRows.filter(row => row?.name === selectedRow && !displayRows.includes(row))))
   }
 
   const handleDelete = (name) => {
-    setDisplayRows([...displayRows].filter(row => row?.name !== name))
+    setDisplayRows(displayRows.slice().filter(row => row?.name !== name))
   }
 
   return (

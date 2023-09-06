@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Box, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import AddBoxIcon from '@mui/icons-material/AddBox';
+import Loading from "./Loading";
 
 const DisplaySelection = (props) => {
   const { label, dataRows, setOptionalDialogOpen, selectedRow, setSelectedRow } = props;
@@ -11,7 +12,7 @@ const DisplaySelection = (props) => {
   };
 
   if (!selectedRow || dataRows.length === 0) {
-    return "LOADING..";
+    return <Loading  />;
   }
 
   return (

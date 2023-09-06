@@ -1,10 +1,10 @@
 import { Box, Button, TextField } from "@mui/material";
 import * as React from 'react';
-import { uploadFile } from '../api/fileApi';
-import { toast } from "react-toastify";
 import Loading from "./Loading";
 import FileUploadIcon from '@mui/icons-material/FileUpload';
 import PublishIcon from '@mui/icons-material/Publish';
+import { useUploadFileMutation } from "../features/admin/slice/streamApiSlice";
+import { showErrorMessage, showSuccessMessage } from "../utils";
 
 const FileUploader = (props) => {
 
@@ -16,7 +16,7 @@ const FileUploader = (props) => {
 
   const [displayUploadBtn, setDisplayUploadBtn] = React.useState(false);
 
-  const [uploading, setUploading] = React.useState(false);
+  const [uploadFile, { isLoading }] = useUploadFileMutation();
 
   const handleTextInputChange = (event) => {
     setUrl(event.target.value);
@@ -42,22 +42,16 @@ const FileUploader = (props) => {
 
   const handleUploadFile = async () => {
     try {
-      setUploading(true);
-      const data = await uploadFile(file);
+      const data = await uploadFile(file).unwrap();
       setUrl(data.result.url);
-      toast.success("File uploaded successfully!", {
-        position: toast.POSITION.TOP_RIGHT
-      });
+      showSuccessMessage("File uploaded successfully!");
+      setDisplayUploadBtn(false);
     } catch (error) {
-      toast.error("File upload failed!", {
-        position: toast.POSITION.TOP_RIGHT
-      });
+      showErrorMessage(error, "File upload failed!");
     }
-    setUploading(false);
-    setDisplayUploadBtn(false);
   }
 
-  if (uploading) {
+  if (isLoading) {
     return <Loading type={loader} />
   }
 
@@ -76,8 +70,8 @@ const FileUploader = (props) => {
               <Button
                 startIcon={<FileUploadIcon />}
                 variant="outlined"
-                component="span" 
-                sx={{py: 2, px: 3}}>
+                component="span"
+                sx={{ py: 2, px: 3 }}>
                 {label}
               </Button>
             </label>

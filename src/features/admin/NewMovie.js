@@ -1,22 +1,24 @@
 import { Box, Button, Divider, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { createMovie, editMovie, fetchMovieBySlug } from "../../api/movieApi";
 import MovieForm from "./MovieForm";
 import CharacterForm from "./CharacterForm";
-import { fetchAllGenres } from "../../api/genreApi";
-import { fetchAllCharacters } from "../../api/characterApi";
 import GenreForm from "./GenreForm";
 import AlertDialog from "../../components/Dialog";
 import { Action } from "../../constants";
 import DisplayTable from "../../components/DisplayTable";
-import { fetchAllProducers } from "../../api/producerApi";
 import DisplaySelection from "../../components/DisplaySelection";
 import DisplayTable2 from "../../components/DisplayTable2";
 import EpisodeForm from "./EpisodeForm";
-import { toast } from "react-toastify";
 import Breadcrumb from "../../components/Breadcumb";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
+import { useFetchMovieQuery } from "../user/slice/movieApiNoCredSlice";
+import { handleError, showSuccessMessage } from "../../utils";
+import { useFetchAllGenresQuery } from "../user/slice/genreApiNoCredSlice";
+import { useFetchAllCharactersQuery } from "./slice/characterApiNoCredSlice";
+import { useFetchAllProducersQuery } from "./slice/producerApiSlice";
+import { useAddMovieMutation, useUpdateMovieMutation } from "./slice/movieApiSlice";
+import Loading from "../../components/Loading";
 
 const EPISODE_TABLE_CONFIG = {
   headers: [
@@ -82,90 +84,116 @@ const CHARACTER_TABLE_CONFIG = {
   ]
 };
 
-const NewMovie = () => {
-
+const NewMovie = ({ createNew }) => {
   const { slug } = useParams();
-
   const navigate = useNavigate();
 
   const defaultGenre = { name: '', description: '' };
-
   const defaultCharacter = { id: '', name: '', avatarUrl: '', description: '' };
-
   const defaultProducer = { name: '', description: '' };
-
   const defaultEpisode = { id: '', name: '', description: '', url: '' };
 
   const [movie, setMovie] = React.useState({});
-
   const [character, setCharacter] = React.useState(defaultCharacter);
-
   const [genre, setGenre] = React.useState(defaultGenre);
-
-  const [selectedGenres, setSelectedGenres] = React.useState([]);
-
-  const [selectedCharacters, setSelectedCharacters] = React.useState([]);
-
   const [producer, setProducer] = React.useState(defaultProducer);
-
-  const [selectedProducer, setSelectedProducer] = React.useState(defaultProducer);
-
   const [episode, setEpisode] = React.useState(defaultEpisode);
 
+  const [selectedGenres, setSelectedGenres] = React.useState([]);
+  const [selectedCharacters, setSelectedCharacters] = React.useState([]);
+  const [selectedProducer, setSelectedProducer] = React.useState(defaultProducer);
   const [selectedEpisodes, setSelectedEpisodes] = React.useState([]);
 
-  React.useEffect(() => {
-    const fetchMovie = async () => {
-      const data = await fetchMovieBySlug(slug);
-      if (data?.code === 200) {
-        const movieData = data?.result;
-        setMovie(movieData);
-        setSelectedGenres(movieData?.genres);
-        setSelectedCharacters(movieData?.characters);
-        setSelectedProducer(movieData?.producer);
-        setSelectedEpisodes(movieData?.episodes);
-      }
-    }
-    if (slug) {
-      fetchMovie();
-    }
-  }, [slug])
-
   const [genres, setGenres] = React.useState([]);
-
-  React.useEffect(() => {
-    const fetchGenres = async () => {
-      const data = await fetchAllGenres();
-      setGenres(data?.results);
-    }
-
-    fetchGenres();
-  }, []);
-
   const [characters, setCharacters] = React.useState([]);
-
-  React.useEffect(() => {
-    const fetchCharacters = async () => {
-      const data = await fetchAllCharacters();
-      setCharacters(data?.results);
-    }
-
-    fetchCharacters();
-  }, []);
+  const [producers, setProducers] = React.useState([]);
 
   const [saveAble, setSaveAble] = React.useState(false);
+
   const [genreDialogOpen, setGenreDialogOpen] = React.useState(false);
   const [characterDialogOpen, setCharacterDialogOpen] = React.useState(false);
   const [producerDialogOpen, setProducerDialogOpen] = React.useState(false);
   const [episodeDialogOpen, setEpisodeDialogOpen] = React.useState(false);
+  const [characterEditDialogOpen, setCharacterEditDialogOpen] = React.useState(false);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
+
   const [editFormState, setEditFormState] = React.useState(defaultEpisode);
   const [editFormOriginalState, setEditFormOriginalState] = React.useState(defaultEpisode);
-
-  const [characterEditDialogOpen, setCharacterEditDialogOpen] = React.useState(false);
   const [characterEditFormState, setCharacterEditFormState] = React.useState(defaultCharacter);
   const [characterEditFormOriginalState, setCharacterEditFormOriginalState] = React.useState(defaultCharacter);
 
+  console.log(selectedCharacters);
+
+  // fetch movie by slug
+  const {
+    data: movieData,
+    isError: isFetchMovieError,
+    error: fetchMovieError
+  } = useFetchMovieQuery(slug, { skip: createNew });
+
+  React.useEffect(() => {
+    setMovie(movieData);
+    setSelectedGenres(movieData?.genres.slice() || []);
+    setSelectedCharacters(movieData?.characters.slice() || []);
+    setSelectedProducer(movieData?.producer);
+    setSelectedEpisodes(movieData?.episodes.slice() || []);
+  }, [movieData]);
+
+  if (isFetchMovieError) {
+    handleError(fetchMovieError, "Cannot fetch the movie!");
+  }
+
+  // fetch all genres
+  const {
+    data: genreData,
+    isError: isFetchAllGenresError,
+    error: fetchAllGenresError
+  } = useFetchAllGenresQuery();
+
+  React.useEffect(() => {
+    setGenres(genreData);
+  }, [genreData]);
+
+  if (isFetchAllGenresError) {
+    handleError(fetchAllGenresError, "Cannot fetch genres!");
+  }
+
+  // fetch all characters
+  const {
+    data: characterData,
+    isError: isFetchAllCharactersError,
+    error: fetchAllCharactersError
+  } = useFetchAllCharactersQuery();
+
+
+  React.useEffect(() => {
+    setCharacters(characterData);
+  }, [characterData]);
+
+  if (isFetchAllCharactersError) {
+    handleError(fetchAllCharactersError, "Cannot fetch characters!");
+  }
+
+  // fetch all producers
+  const {
+    data: producerData,
+    isError: isFetchAllProducersError,
+    error: fetchAllProducersError
+  } = useFetchAllProducersQuery();
+
+  React.useEffect(() => {
+    setProducers(producerData);
+  }, [producerData]);
+
+  if (isFetchAllProducersError) {
+    handleError(fetchAllProducersError, "Cannot fetch producers!");
+  }
+
+  // mutation api
+  const [addMovie] = useAddMovieMutation();
+  const [updateMovie] = useUpdateMovieMutation();
+
+  // handle methods
   const handleGenreDialogClose = () => {
     setGenreDialogOpen(false);
     setGenre(defaultGenre);
@@ -187,17 +215,6 @@ const NewMovie = () => {
     setCharacter(defaultCharacter);
     handleCharacterDialogClose();
   }
-
-  const [producers, setProducers] = React.useState([]);
-
-  React.useEffect(() => {
-    const fetchProducers = async () => {
-      const data = await fetchAllProducers();
-      setProducers(data?.results);
-    }
-
-    fetchProducers();
-  }, []);
 
   const handleProducerDialogClose = () => {
     setProducerDialogOpen(false);
@@ -235,28 +252,20 @@ const NewMovie = () => {
       producer: selectedProducer
     }
 
-    if (slug) {
+    if (createNew) {
       try {
-        await editMovie(movie.id, moviePayload)
-        toast.success("Movie updated successfully!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
+        await addMovie(moviePayload).unwrap();
+        showSuccessMessage("Movie created successfully!");
+        navigate("/admin/movie", { replace: true });
       } catch (error) {
-        toast.error("Cannot update the movie!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
+        handleError(error);
       }
     } else {
       try {
-        await createMovie(moviePayload);
-        toast.success("Movie created successfully!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
-        navigate("/admin/movie", { replace: true });
+        await updateMovie({ id: movie.id, payload: moviePayload }).unwrap();
+        showSuccessMessage("Movie updated successfully!");
       } catch (error) {
-        toast.error("Cannot create the movie!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
+        handleError(error);
       }
     }
   }
@@ -293,12 +302,16 @@ const NewMovie = () => {
   }
 
   const handleCharacterEditDialogSave = () => {
-    const characters = movie.characters;
-    const character = characters.filter(ep => ep.id === characterEditFormOriginalState.id).at(0);
-    const index = characters.indexOf(character);
-    characters.splice(index, 1, characterEditFormState);
-    setMovie({ ...movie, characters })
+    console.log(characterEditFormOriginalState);
+    console.log(characterEditFormState);
+    const character = selectedCharacters?.filter(ep => ep.id === characterEditFormOriginalState.id).at(0);
+    const index = selectedCharacters.indexOf(character);
+    setSelectedCharacters(selectedCharacters.slice().splice(index, 1, characterEditFormState));
     handleCharacterEditDialogClose();
+  }
+
+  if (!genres || !characters || !producers) {
+    return <Loading />;
   }
 
   return (
@@ -310,11 +323,11 @@ const NewMovie = () => {
             { link: "/admin/movie", title: "Movie" }
           ]
         }
-        currentPage={slug ? "Edit - " + movie?.name : "Create"}
+        currentPage={createNew ? "Create" : "Edit - " + movie?.name}
         admin
       />
 
-      <MovieForm movie={movie} setMovie={setMovie} createNew={!slug} />
+      <MovieForm movie={movie} setMovie={setMovie} createNew={createNew} />
 
       <Divider sx={{ my: 5 }} />
 
