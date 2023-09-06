@@ -21,6 +21,8 @@ import BootstrapInput from '../../components/BootstrapInput';
 import Breadcrumb from '../../components/Breadcumb';
 import Loading from '../../components/Loading';
 import { toast } from 'react-toastify';
+import { useFetchAllMoviesQuery } from "../user/slice/movieApiNoCredSlice";
+import { useDeleteMoviesMutation } from "./slice/movieApiSlice";
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -98,26 +100,27 @@ export default function EnhancedTable() {
   const [dense, setDense] = React.useState(false);
   const [pageSize, setPageSize] = React.useState(10);
   const [totalElements, setTotalElements] = React.useState(0);
-  const [rows, setRows] = React.useState([]);
-  const [genreIds, setGenreIds] = React.useState([]);
+  const [movies, setMovies] = React.useState([]);
+  const [movieIds, setMovieIds] = React.useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [scrollPosition, setScrollPosition] = React.useState(0);
+  const pageNo = searchParams.get("page") || 1;
+
+  const {
+    data: movieData,
+  } = useFetchAllMoviesQuery({ pageNo, pageSize });
+
+  const [deleteMovies] = useDeleteMoviesMutation();
 
   React.useEffect(() => {
-    const fetchMovies = async () => {
-      const params = { pageNo: searchParams.get("page") || 1, pageSize };
-      const data = await fetchAllMovies(params);
-      setTotalElements(data?.totalElements);
-      const rowDatas = data?.results?.map((el, index) => ({ no: index + 1, ...el }));
-      setRows(rowDatas);
-    }
+    setTotalElements(movieData?.totalElements);
+    const rowDatas = movieData?.results?.map((el, index) => ({ no: index + 1, ...el }));
+    setMovies(rowDatas);
+  }, [movieData]);
 
-    fetchMovies();
-  }, [searchParams, pageSize]);
-
-  const getSelectedGenres = React.useCallback(() => {
-    return rows.filter(row => genreIds.includes(row.id));
-  }, [genreIds, rows]);
+  const getSelectedMovies = React.useCallback(() => {
+    return movies.filter(movie => movieIds.includes(movie.id));
+  }, [movieIds, movies]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -139,14 +142,14 @@ export default function EnhancedTable() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.no);
+      const newSelected = movies.map((n) => n.no);
       setSelected(newSelected);
-      const ids = rows.map((n) => n.id);
-      setGenreIds(ids);
+      const ids = movies.map((n) => n.id);
+      setMovieIds(ids);
       return;
     }
     setSelected([]);
-    setGenreIds([]);
+    setMovieIds([]);
   };
 
   const handleClick = (event, no, id) => {
@@ -156,26 +159,26 @@ export default function EnhancedTable() {
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, no);
-      ids = ids.concat(genreIds, id);
+      ids = ids.concat(movieIds, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
-      ids = ids.concat(genreIds.slice(1));
+      ids = ids.concat(movieIds.slice(1));
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1));
-      ids = ids.concat(genreIds.slice(0, -1));
+      ids = ids.concat(movieIds.slice(0, -1));
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
         selected.slice(selectedIndex + 1),
       );
       ids = ids.concat(
-        genreIds.slice(0, selectedIndex),
-        genreIds.slice(selectedIndex + 1),
+        movieIds.slice(0, selectedIndex),
+        movieIds.slice(selectedIndex + 1),
       );
     }
 
     setSelected(newSelected);
-    setGenreIds(ids);
+    setMovieIds(ids);
   };
 
   const handlePageChange = (event, newPage) => {
@@ -195,8 +198,8 @@ export default function EnhancedTable() {
 
   const visibleRows = React.useMemo(
     () =>
-      stableSort(rows, getComparator(order, orderBy)),
-    [rows, order, orderBy]
+      stableSort(movies, getComparator(order, orderBy)),
+    [movies, order, orderBy]
   );
 
   const toggleDeleteDialogOpen = () => {
@@ -204,7 +207,7 @@ export default function EnhancedTable() {
   }
 
   const toggleEditDialogOpen = () => {
-    const selectedItem = getSelectedGenres();
+    const selectedItem = getSelectedMovies();
     if (selectedItem.length > 0) {
       navigate(`/admin/edit-movie/${selectedItem[0].slug}`, { replace: true });
     }
@@ -216,18 +219,18 @@ export default function EnhancedTable() {
   }
 
   const handleDeleteDialogProcess = async () => {
-    if (genreIds.length > 0) {
+    if (movieIds.length > 0) {
       try {
-        await deleteMovies(genreIds);
-        const genres = rows.filter(row => !genreIds.includes(row.id)).map((row, index) => ({ ...row, no: index + 1 }));
-        setRows(genres);
+        await deleteMovies(movieIds).unwrap();
+        const rows = movies.filter(movie => !movieIds.includes(movie.id)).map((movie, index) => ({ ...movie, no: index + 1 }));
+        setMovies(rows);
         setSelected([]);
-        setGenreIds([]);
-        toast.success(genreIds.length > 1 ? "Movies deleted successfully!" : "Movie deleted successfully!", {
+        setMovieIds([]);
+        toast.success(movieIds.length > 1 ? "Movies deleted successfully!" : "Movie deleted successfully!", {
           position: toast.POSITION.TOP_RIGHT
         });
       } catch (error) {
-        toast.error(genreIds.length > 1 ?  "Cannot delete the movies!": "Cannot delete the movie!", {
+        toast.error(movieIds.length > 1 ? "Cannot delete the movies!" : "Cannot delete the movie!", {
           position: toast.POSITION.TOP_RIGHT
         });
       }
@@ -257,7 +260,7 @@ export default function EnhancedTable() {
       <AlertDialog
         open={deleteDialogOpen}
         dialogTitle="Delete Movie"
-        children={<DeleteForm names={getSelectedGenres().map(genre => genre.name)} />}
+        children={<DeleteForm names={getSelectedMovies().map(movie => movie.name)} />}
         handleProcess={handleDeleteDialogProcess}
         handleClose={handleDeleteDialogClose}
         saveAble={false}
@@ -284,7 +287,7 @@ export default function EnhancedTable() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={movies.length}
               headCells={headCells}
               ariaLabel={"select all movies"}
             />
