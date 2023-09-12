@@ -1,7 +1,6 @@
 import * as React from "react"
 import { Box, Button, FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import AddBoxIcon from '@mui/icons-material/AddBox';
-import Loading from "./Loading";
 
 const DisplaySelection = (props) => {
   const { label, dataRows, setOptionalDialogOpen, selectedRow, setSelectedRow } = props;
@@ -11,10 +10,6 @@ const DisplaySelection = (props) => {
     setSelectedRow(selectedRow1);
   };
 
-  if (!selectedRow || dataRows.length === 0) {
-    return <Loading  />;
-  }
-
   return (
     <Box>
       <Box sx={{ display: "flex", alignItems: "center", justifyContent: "space-between", my: 1 }}>
@@ -23,7 +18,7 @@ const DisplaySelection = (props) => {
             <InputLabel id="Data-select">Select</InputLabel>
             <Select
               labelId="Data-select"
-              value={selectedRow.name}
+              value={selectedRow?.name || ""}
               label={label}
               onChange={handleSelectInputChange}
             >

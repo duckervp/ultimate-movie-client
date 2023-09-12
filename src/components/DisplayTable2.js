@@ -107,31 +107,33 @@ const DisplayTable2 = (props) => {
             </TableRow>
           </TableHead>
           <TableBody>
-            {displayRows?.sort((a, b) => {
-              if (a[config.columns.at(config.keyIndex).field] > b[config.columns.at(config.keyIndex).field]) {
-                return 1;
-              } else if (a[config.columns.at(config.keyIndex).field] < b[config.columns.at(config.keyIndex).field]) {
-                return -1;
-              } else {
-                return 0;
-              }
-            })?.map((row) => (
-              <TableRow
-                key={row[config.columns.at(config.keyIndex).field]}
-                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-              >
-                {
-                  config.columns.map(col => <TableCell align={col.align || 'left'} key={col.field} component="th" scope="row" sx={col.displayImage && { display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                    {row[col.field]}
-                    {(col.displayImage && row[col.field]) && <img src={row[col.field]} alt={label} height={100} />}
-                  </TableCell>)
-                }
-                <TableCell align="right">
-                  <Button onClick={() => handleModify(row)}><TuneIcon /></Button>
-                  <Button onClick={() => handleDelete(row[config.columns.at(config.keyIndex).field])}><DeleteIcon /></Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {displayRows
+              // ?.sort((a, b) => {
+              //   if (a[config.columns.at(config.keyIndex).field] > b[config.columns.at(config.keyIndex).field]) {
+              //     return 1;
+              //   } else if (a[config.columns.at(config.keyIndex).field] < b[config.columns.at(config.keyIndex).field]) {
+              //     return -1;
+              //   } else {
+              //     return 0;
+              //   }
+              // })
+              ?.map((row) => (
+                <TableRow
+                  key={row[config.columns.at(config.keyIndex).field]}
+                  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                >
+                  {
+                    config.columns.map(col => <TableCell align={col.align || 'left'} key={col.field} component="th" scope="row" sx={col.displayImage && { display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      {row[col.field]}
+                      {(col.displayImage && row[col.field]) && <img src={row[col.field]} alt={label} height={100} />}
+                    </TableCell>)
+                  }
+                  <TableCell align="right">
+                    <Button onClick={() => handleModify(row)}><TuneIcon /></Button>
+                    <Button onClick={() => handleDelete(row[config.columns.at(config.keyIndex).field])}><DeleteIcon /></Button>
+                  </TableCell>
+                </TableRow>
+              ))}
           </TableBody>
         </Table>
       </TableContainer>

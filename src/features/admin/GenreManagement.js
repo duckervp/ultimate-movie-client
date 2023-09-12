@@ -12,7 +12,6 @@ import Switch from '@mui/material/Switch';
 import { FormControl, InputLabel, NativeSelect, Pagination } from '@mui/material';
 import EnhancedTableToolbar from '../../components/EnhancedTableToolbar';
 import EnhancedTableHead from '../../components/EnhancedTableHead';
-import { createGenre, deleteGenres, fetchAllGenres, updateGenre } from '../../api/genreApi';
 import AlertDialog from '../../components/Dialog';
 import GenreForm from './GenreForm';
 import { Action } from '../../constants';
@@ -20,38 +19,10 @@ import DeleteForm from './DeleteForm';
 import BootstrapInput from '../../components/BootstrapInput';
 import Breadcrumb from '../../components/Breadcumb';
 import { toast } from 'react-toastify';
-
-function descendingComparator(a, b, orderBy) {
-  if (b[orderBy] < a[orderBy]) {
-    return -1;
-  }
-  if (b[orderBy] > a[orderBy]) {
-    return 1;
-  }
-  return 0;
-}
-
-function getComparator(order, orderBy) {
-  return order === 'desc'
-    ? (a, b) => descendingComparator(a, b, orderBy)
-    : (a, b) => -descendingComparator(a, b, orderBy);
-}
-
-// Since 2020 all major browsers ensure sort stability with Array.prototype.sort().
-// stableSort() brings sort stability to non-modern browsers (notably IE11). If you
-// only support modern browsers you can replace stableSort(exampleArray, exampleComparator)
-// with exampleArray.slice().sort(exampleComparator)
-function stableSort(array, comparator) {
-  const stabilizedThis = array.map((el, index) => [el, index]);
-  stabilizedThis.sort((a, b) => {
-    const order = comparator(a[0], b[0]);
-    if (order !== 0) {
-      return order;
-    }
-    return a[1] - b[1];
-  });
-  return stabilizedThis.map((el) => el[0]);
-}
+import { useFetchAllGenresQuery } from '../user/slice/genreApiNoCredSlice';
+import { getComparator, handleError, showSuccessMessage, stableSort } from '../../utils';
+import Loading from '../../components/Loading';
+import { useAddGenreMutation, useDeleteGenresMutation, useUpdateGenreMutation } from "./slice/genreApiSlice";
 
 const headCells = [
   {
@@ -100,7 +71,8 @@ export default function GenreEnhancedTable() {
   const [scrollPosition, setScrollPosition] = React.useState(0);
 
   const getSelectedGenres = React.useCallback(() => {
-    return rows.filter(row => genreIds.includes(row.id));
+
+    return (rows || []).filter(row => genreIds.includes(row.id));
   }, [genreIds, rows]);
 
   React.useEffect(() => {
@@ -115,16 +87,22 @@ export default function GenreEnhancedTable() {
     };
   }, []);
 
-  React.useEffect(() => {
-    const fetchMovies = async () => {
-      const data = await fetchAllGenres();
-      setTotalElements(data?.totalElements);
-      const rowDatas = data?.results.map((item, index) => ({ no: index + 1, ...item }));
-      setRows(rowDatas);
-    }
+  const { data: genreData, isError, error } = useFetchAllGenresQuery();
+  const [addGenre, {isLoading: isAdding}] = useAddGenreMutation();
+  const [updateGenre, {isLoading: isUpdating}] = useUpdateGenreMutation();
+  const [deleteGenres, {isLoading: isDeleting}] = useDeleteGenresMutation();
 
-    fetchMovies();
-  }, []);
+  React.useEffect(() => {
+    setTotalElements(genreData?.totalElements);
+    const rowDatas = genreData?.results?.slice().map((item, index) => ({ no: index + 1, ...item }));
+    setRows(rowDatas);
+  }, [genreData]);
+
+  React.useEffect(() => {
+    if (isError) {
+      handleError(error);
+    }
+  }, [isError, error]);
 
   React.useEffect(() => {
     if (genreIds.length === 1 && rows.length > 0) {
@@ -204,36 +182,6 @@ export default function GenreEnhancedTable() {
     [rows, order, orderBy]
   );
 
-  const handleEditDialogSave = async () => {
-    if (genreIds.length === 1) {
-      try {
-        const genreId = genreIds[0];
-        const data = await updateGenre(genreId, editFormState);
-        const updatedRows = [...rows];
-        // const updateRow = updatedRows.filter(row => row.id === genreId)[0];
-        let index = 0;
-        for (let i = 0; i < updatedRows.length; i++) {
-          if (updatedRows[i].id === genreId) {
-            index = i;
-          }
-        }
-        const updatedRow = { ...updatedRows[index], ...data?.result };
-        updatedRows.splice(index, 1, updatedRow);
-        setRows(updatedRows);
-        setSelected([]);
-        setGenreIds([]);
-        toast.success("Genre updated successfully!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
-      } catch (error) {
-        toast.error("Cannot update the genre!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
-      }
-    }
-    handleEditDialogClose();
-  }
-
   const handleEditDialogClose = () => {
     setEditFormState(editFormOriginalState);
     setEditDialogOpen(false);
@@ -254,27 +202,6 @@ export default function GenreEnhancedTable() {
     setCreateDialogOpen(!createDialogOpen);
   }
 
-  const handleDeleteDialogProcess = async () => {
-    if (genreIds.length > 0) {
-      try {
-        await deleteGenres(genreIds);
-        const genres = rows.filter(row => !genreIds.includes(row.id)).map((row, index) => ({ ...row, no: index + 1 }));
-        setRows(genres);
-        setSelected([]);
-        setGenreIds([]);
-        toast.success(genreIds.length > 1 ? "Genres deleted successfully!" : "Genres deleted successfully!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
-      } catch (error) {
-        toast.error(genreIds.length > 1 ? "Cannot delete the genres!" : "Cannot delete the genre!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
-      }
-    }
-
-    handleDeleteDialogClose();
-  }
-
   const handleDeleteDialogClose = () => {
     setDeleteDialogOpen(false);
   }
@@ -283,9 +210,53 @@ export default function GenreEnhancedTable() {
     setCreateDialogOpen(false);
   }
 
+  const handleEditDialogSave = async () => {
+    if (genreIds.length === 1) {
+      try {
+        const genreId = genreIds[0];
+        const data = await updateGenre({ id: genreId, payload: editFormState }).unwrap();
+        const updatedRows = [...rows];
+        let index = 0;
+        for (let i = 0; i < updatedRows.length; i++) {
+          if (updatedRows[i].id === genreId) {
+            index = i;
+          }
+        }
+        const updatedRow = { ...updatedRows[index], ...data?.result };
+        updatedRows.splice(index, 1, updatedRow);
+        setRows(updatedRows);
+        setSelected([]);
+        setGenreIds([]);
+        showSuccessMessage("Genre updated successfully!");
+      } catch (error) {
+        handleError(error, "Cannot update the genre!");
+      }
+    }
+    handleEditDialogClose();
+  }
+
+  const handleDeleteDialogProcess = async () => {
+    if (genreIds.length > 0) {
+      try {
+        await deleteGenres(genreIds).unwrap();
+        const genres = rows.filter(row => !genreIds.includes(row.id)).map((row, index) => ({ ...row, no: index + 1 }));
+        setRows(genres);
+        setSelected([]);
+        setGenreIds([]);
+        const successMessage = genreIds.length > 1 ? "Genres deleted successfully!" : "Genres deleted successfully!";
+        showSuccessMessage(successMessage);
+      } catch (error) {
+        const errorMessage = genreIds.length > 1 ? "Cannot delete the genres!" : "Cannot delete the genre!";
+        handleError(error, errorMessage);
+      }
+    }
+
+    handleDeleteDialogClose();
+  }
+
   const handleCreateDialogSave = async () => {
     try {
-      const data = await createGenre(editFormState);
+      const data = await addGenre(editFormState).unwrap();
       const updatedRows = [...rows];
       updatedRows.push({ ...data?.result, no: rows.length + 1 });
       setRows(updatedRows);
@@ -303,8 +274,13 @@ export default function GenreEnhancedTable() {
     }
   }
 
+  if (!rows) {
+    return <Loading />
+  }
+
   return (
     <Box sx={{ width: '100%' }}>
+      { (isAdding || isUpdating || isDeleting) && <Loading type={"linear"} fullScreen/>}
       <Breadcrumb
         links={
           [{ link: "/admin", title: "Dashboard" }]

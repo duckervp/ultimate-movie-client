@@ -17,8 +17,6 @@ const COUNTRY = [
 export default function MovieForm(props) {
   const { movie, setMovie, createNew } = props;
 
-  console.log(movie);
-
   const handleTextInputChange = (event) => {
     const newMovie = { ...movie };
     newMovie[event.target.name] = event.target.value;

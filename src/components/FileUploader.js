@@ -52,7 +52,7 @@ const FileUploader = (props) => {
   }
 
   if (isLoading) {
-    return <Loading type={loader} />
+    return <Loading type={loader || "circle"} />
   }
 
   return (

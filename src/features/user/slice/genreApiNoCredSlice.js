@@ -4,7 +4,6 @@ export const genreApiNoCredSlice = noAuthApiSlice.injectEndpoints({
   endpoints: builder => ({
     fetchAllGenres: builder.query({
       query: () => "/genres",
-      transformResponse: (response) => response.results,
       keepUnusedDataFor: 3600,
     }),
   }),
@@ -12,5 +11,5 @@ export const genreApiNoCredSlice = noAuthApiSlice.injectEndpoints({
 
 
 export const {
-  useFetchAllGenresQuery
+  useFetchAllGenresQuery,
 } = genreApiNoCredSlice;

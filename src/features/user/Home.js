@@ -19,10 +19,11 @@ const Home = () => {
   const navigate = useNavigate();
 
   const [movies, setMovies] = useState([]);
+  const [genres, setGenres] = useState([]);
   const [totalElements, setTotalElements] = useState(0);
 
   const {
-    data: genres,
+    data: genreData,
   } = useFetchAllGenresQuery();
 
   const {
@@ -33,6 +34,10 @@ const Home = () => {
     setMovies(movieData?.results);
     setTotalElements(movieData?.totalElements);
   }, [movieData]);
+
+  useEffect(() => {
+    setGenres(genreData?.results);
+  }, [genreData]);
 
   const handlePageChange = (_, value) => {
     searchParams.set("page", value);

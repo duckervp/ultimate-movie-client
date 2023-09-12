@@ -13,7 +13,7 @@ import EpisodeForm from "./EpisodeForm";
 import Breadcrumb from "../../components/Breadcumb";
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import { useFetchMovieQuery } from "../user/slice/movieApiNoCredSlice";
-import { handleError, showSuccessMessage } from "../../utils";
+import { handleError, isObjectEquals, showSuccessMessage } from "../../utils";
 import { useFetchAllGenresQuery } from "../user/slice/genreApiNoCredSlice";
 import { useFetchAllCharactersQuery } from "./slice/characterApiNoCredSlice";
 import { useFetchAllProducersQuery } from "./slice/producerApiSlice";
@@ -94,35 +94,36 @@ const NewMovie = ({ createNew }) => {
   const defaultEpisode = { id: '', name: '', description: '', url: '' };
 
   const [movie, setMovie] = React.useState({});
-  const [character, setCharacter] = React.useState(defaultCharacter);
+
+  // form data state
   const [genre, setGenre] = React.useState(defaultGenre);
   const [producer, setProducer] = React.useState(defaultProducer);
-  const [episode, setEpisode] = React.useState(defaultEpisode);
-
+  const [orgCharacter, setOrgCharacter] = React.useState(defaultCharacter);
+  const [character, setCharacter] = React.useState(defaultCharacter);
+  const [orgEpisode, setOrgEpisode] = React.useState(defaultEpisode);   // orgEpisode  -> form data before add/edit
+  const [episode, setEpisode] = React.useState(defaultEpisode);         // episode -> form data after add/edit
+   
+  
+  // selectedRows - display rows
   const [selectedGenres, setSelectedGenres] = React.useState([]);
   const [selectedCharacters, setSelectedCharacters] = React.useState([]);
   const [selectedProducer, setSelectedProducer] = React.useState(defaultProducer);
   const [selectedEpisodes, setSelectedEpisodes] = React.useState([]);
 
+  // values for select box
   const [genres, setGenres] = React.useState([]);
   const [characters, setCharacters] = React.useState([]);
   const [producers, setProducers] = React.useState([]);
 
   const [saveAble, setSaveAble] = React.useState(false);
 
+  // open state for add/edit/delete form
   const [genreDialogOpen, setGenreDialogOpen] = React.useState(false);
   const [characterDialogOpen, setCharacterDialogOpen] = React.useState(false);
   const [producerDialogOpen, setProducerDialogOpen] = React.useState(false);
   const [episodeDialogOpen, setEpisodeDialogOpen] = React.useState(false);
   const [characterEditDialogOpen, setCharacterEditDialogOpen] = React.useState(false);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
-
-  const [editFormState, setEditFormState] = React.useState(defaultEpisode);
-  const [editFormOriginalState, setEditFormOriginalState] = React.useState(defaultEpisode);
-  const [characterEditFormState, setCharacterEditFormState] = React.useState(defaultCharacter);
-  const [characterEditFormOriginalState, setCharacterEditFormOriginalState] = React.useState(defaultCharacter);
-
-  console.log(selectedCharacters);
 
   // fetch movie by slug
   const {
@@ -194,6 +195,8 @@ const NewMovie = ({ createNew }) => {
   const [updateMovie] = useUpdateMovieMutation();
 
   // handle methods
+
+  // handle genre actions
   const handleGenreDialogClose = () => {
     setGenreDialogOpen(false);
     setGenre(defaultGenre);
@@ -205,6 +208,8 @@ const NewMovie = ({ createNew }) => {
     handleGenreDialogClose();
   }
 
+ 
+ // handle character actions
   const handleCharacterDialogClose = () => {
     setCharacterDialogOpen(false);
     setCharacter(defaultCharacter);
@@ -216,6 +221,35 @@ const NewMovie = ({ createNew }) => {
     handleCharacterDialogClose();
   }
 
+  const handleEditCharacter = (row) => {
+    setCharacterEditDialogOpen(true);
+    setOrgCharacter(row);
+    setCharacter(row);
+  }
+
+  const handleCharacterEditDialogClose = () => {
+    setCharacterEditDialogOpen(false);
+    setCharacter(orgCharacter);
+  }
+
+  const handleCharacterEditDialogSave = () => {
+    let index = 0;
+
+    for (let i = 0; i < selectedCharacters.length; i++) {
+      if (isObjectEquals(selectedCharacters.at(i), orgCharacter)) {
+        index = i;
+        break;
+      }
+    }
+
+    const newChars = selectedCharacters.slice();
+    newChars.splice(index, 1, character);
+
+    setSelectedCharacters(newChars);
+    handleCharacterEditDialogClose();
+  }
+
+  // handle producer actions
   const handleProducerDialogClose = () => {
     setProducerDialogOpen(false);
     setProducer(defaultProducer);
@@ -232,6 +266,8 @@ const NewMovie = ({ createNew }) => {
     setMovie({ ...movie, producer: producer });
   }
 
+
+  // handle episode actions
   const handleEpisodeDialogClose = () => {
     setEpisodeDialogOpen(false);
     setEpisode(defaultEpisode);
@@ -243,6 +279,36 @@ const NewMovie = ({ createNew }) => {
     handleEpisodeDialogClose();
   }
 
+  const handleEditEpisode = (row) => {
+    setEditDialogOpen(true);
+    setOrgEpisode(row);
+    setEpisode(row);
+  }
+
+  const handleEditDialogClose = () => {
+    setEditDialogOpen(false);
+    setEpisode(orgEpisode);
+  }
+
+  const handleEditDialogSave = () => {
+    let index = 0;
+
+    for (let i = 0; i < selectedEpisodes.length; i++) {
+      if (isObjectEquals(selectedEpisodes.at(i), orgEpisode)) {
+        index = i;
+        break;
+      }
+    }
+
+    const newSelectedEpisodes = selectedEpisodes.slice();
+    newSelectedEpisodes.splice(index, 1, episode);
+
+    setSelectedEpisodes(newSelectedEpisodes);
+
+    handleEditDialogClose();
+  }
+
+  // call api create/update movie
   const hanleMovieSaveChange = async () => {
     const moviePayload = {
       ...movie,
@@ -270,45 +336,6 @@ const NewMovie = ({ createNew }) => {
     }
   }
 
-  const handleEditEpisode = (row) => {
-    setEditDialogOpen(true);
-    setEditFormOriginalState(row);
-    setEditFormState(row);
-  }
-
-  const handleEditDialogClose = () => {
-    setEditDialogOpen(false);
-    setEditFormState(editFormOriginalState);
-  }
-
-  const handleEditDialogSave = () => {
-    const episodes = movie.episodes;
-    const episode = episodes.filter(ep => ep.id === editFormOriginalState.id).at(0);
-    const index = episodes.indexOf(episode);
-    episodes.splice(index, 1, editFormState);
-    setMovie({ ...movie, episodes })
-    handleEditDialogClose();
-  }
-
-  const handleEditCharacter = (row) => {
-    setCharacterEditDialogOpen(true);
-    setCharacterEditFormOriginalState(row);
-    setCharacterEditFormState(row);
-  }
-
-  const handleCharacterEditDialogClose = () => {
-    setCharacterEditDialogOpen(false);
-    setCharacterEditFormState(characterEditFormOriginalState);
-  }
-
-  const handleCharacterEditDialogSave = () => {
-    console.log(characterEditFormOriginalState);
-    console.log(characterEditFormState);
-    const character = selectedCharacters?.filter(ep => ep.id === characterEditFormOriginalState.id).at(0);
-    const index = selectedCharacters.indexOf(character);
-    setSelectedCharacters(selectedCharacters.slice().splice(index, 1, characterEditFormState));
-    handleCharacterEditDialogClose();
-  }
 
   if (!genres || !characters || !producers) {
     return <Loading />;
@@ -388,9 +415,9 @@ const NewMovie = ({ createNew }) => {
           children={
             <CharacterForm
               action={Action.EDIT}
-              originalState={characterEditFormOriginalState}
-              formState={characterEditFormState}
-              setFormState={setCharacterEditFormState}
+              originalState={orgCharacter}
+              formState={character}
+              setFormState={setCharacter}
               toggleSaveAble={setSaveAble} />}
           handleProcess={handleCharacterEditDialogSave}
           handleClose={handleCharacterEditDialogClose}
@@ -468,9 +495,9 @@ const NewMovie = ({ createNew }) => {
           children={
             <EpisodeForm
               action={Action.EDIT}
-              originalState={editFormOriginalState}
-              formState={editFormState}
-              setFormState={setEditFormState}
+              originalState={orgEpisode}
+              formState={episode}
+              setFormState={setEpisode}
               toggleSaveAble={setSaveAble} />}
           handleProcess={handleEditDialogSave}
           handleClose={handleEditDialogClose}
