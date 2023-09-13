@@ -1,9 +1,9 @@
-import { Box, Button, Divider, Typography } from "@mui/material";
+import { Box, Divider, Typography } from "@mui/material";
 import React from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import MovieForm from "./MovieForm";
 import CharacterForm from "./CharacterForm";
-import GenreForm from "./GenreForm";
+import GenreForm from "./SimpleForm";
 import AlertDialog from "../../components/Dialog";
 import { Action } from "../../constants";
 import DisplayTable from "../../components/DisplayTable";
@@ -19,6 +19,7 @@ import { useFetchAllCharactersQuery } from "./slice/characterApiNoCredSlice";
 import { useFetchAllProducersQuery } from "./slice/producerApiSlice";
 import { useAddMovieMutation, useUpdateMovieMutation } from "./slice/movieApiSlice";
 import Loading from "../../components/Loading";
+import LoadingButton from '@mui/lab/LoadingButton';
 
 const EPISODE_TABLE_CONFIG = {
   headers: [
@@ -102,8 +103,8 @@ const NewMovie = ({ createNew }) => {
   const [character, setCharacter] = React.useState(defaultCharacter);
   const [orgEpisode, setOrgEpisode] = React.useState(defaultEpisode);   // orgEpisode  -> form data before add/edit
   const [episode, setEpisode] = React.useState(defaultEpisode);         // episode -> form data after add/edit
-   
-  
+
+
   // selectedRows - display rows
   const [selectedGenres, setSelectedGenres] = React.useState([]);
   const [selectedCharacters, setSelectedCharacters] = React.useState([]);
@@ -152,7 +153,7 @@ const NewMovie = ({ createNew }) => {
   } = useFetchAllGenresQuery();
 
   React.useEffect(() => {
-    setGenres(genreData);
+    setGenres(genreData?.results);
   }, [genreData]);
 
   if (isFetchAllGenresError) {
@@ -183,7 +184,7 @@ const NewMovie = ({ createNew }) => {
   } = useFetchAllProducersQuery();
 
   React.useEffect(() => {
-    setProducers(producerData);
+    setProducers(producerData?.results);
   }, [producerData]);
 
   if (isFetchAllProducersError) {
@@ -191,8 +192,8 @@ const NewMovie = ({ createNew }) => {
   }
 
   // mutation api
-  const [addMovie] = useAddMovieMutation();
-  const [updateMovie] = useUpdateMovieMutation();
+  const [addMovie, { isLoading: isAdding }] = useAddMovieMutation();
+  const [updateMovie, { isLoading: isUpdating }] = useUpdateMovieMutation();
 
   // handle methods
 
@@ -208,8 +209,8 @@ const NewMovie = ({ createNew }) => {
     handleGenreDialogClose();
   }
 
- 
- // handle character actions
+
+  // handle character actions
   const handleCharacterDialogClose = () => {
     setCharacterDialogOpen(false);
     setCharacter(defaultCharacter);
@@ -514,15 +515,17 @@ const NewMovie = ({ createNew }) => {
         />
       </Box>
 
-      <Button
+      <LoadingButton
         onClick={hanleMovieSaveChange}
         variant="contained"
         size="large"
         fullWidth
         startIcon={<CheckCircleIcon />}
+        loadingPosition="start"
+        loading={isAdding || isUpdating}
         sx={{ mt: 5, py: 2 }}>
         SAVE
-      </Button>
+      </LoadingButton>
     </Box>
   );
 }

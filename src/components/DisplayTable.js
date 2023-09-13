@@ -33,7 +33,7 @@ const DisplayTable = (props) => {
               label={label}
               onChange={handleSelectInputChange}
             >
-              {dataRows?.map(row => (<MenuItem key={row?.name + '-' + row?.id} value={row?.name}>{row?.name}</MenuItem>))}
+              {dataRows.map(row => (<MenuItem key={row?.name + '-' + row?.id} value={row?.name}>{row?.name}</MenuItem>))}
             </Select>
           </FormControl>
           <Button onClick={handleAddData} variant="outlined" endIcon={<AddCircleOutlineIcon />} sx={{py: 1.8, px: 3}}>Add</Button>

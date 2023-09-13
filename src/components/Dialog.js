@@ -7,9 +7,10 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import { Box } from '@mui/material';
 import { Action } from '../constants';
+import Loading from './Loading';
 
 export default function AlertDialog(props) {
-  const { open, dialogTitle, children, handleProcess, handleClose, saveAble, action } = props;
+  const { open, dialogTitle, children, handleProcess, handleClose, saveAble, action, isLoading } = props;
   return (
     <Box>
       <Dialog
@@ -26,11 +27,14 @@ export default function AlertDialog(props) {
             {children}
           </DialogContentText>
         </DialogContent>
-        <DialogActions>
-          {saveAble && ([Action.CREATE, Action.EDIT].includes(action)) && <Button onClick={handleProcess}>Save</Button>}
-          {action === Action.DELETE && <Button onClick={handleProcess}>Delete</Button>}
-          <Button onClick={handleClose} autoFocus>Cancel</Button>
-        </DialogActions>
+        {
+          isLoading ? <DialogActions> <Loading type={"linear"} /> </DialogActions> :
+            <DialogActions>
+              {saveAble && ([Action.CREATE, Action.EDIT].includes(action)) && <Button onClick={handleProcess}>Save</Button>}
+              {action === Action.DELETE && <Button onClick={handleProcess}>Delete</Button>}
+              <Button onClick={handleClose} autoFocus>Cancel</Button>
+            </DialogActions>
+        }
       </Dialog>
     </Box>
   );

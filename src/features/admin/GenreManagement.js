@@ -13,7 +13,6 @@ import { FormControl, InputLabel, NativeSelect, Pagination } from '@mui/material
 import EnhancedTableToolbar from '../../components/EnhancedTableToolbar';
 import EnhancedTableHead from '../../components/EnhancedTableHead';
 import AlertDialog from '../../components/Dialog';
-import GenreForm from './GenreForm';
 import { Action } from '../../constants';
 import DeleteForm from './DeleteForm';
 import BootstrapInput from '../../components/BootstrapInput';
@@ -23,6 +22,7 @@ import { useFetchAllGenresQuery } from '../user/slice/genreApiNoCredSlice';
 import { getComparator, handleError, showSuccessMessage, stableSort } from '../../utils';
 import Loading from '../../components/Loading';
 import { useAddGenreMutation, useDeleteGenresMutation, useUpdateGenreMutation } from "./slice/genreApiSlice";
+import SimpleForm from './SimpleForm';
 
 const headCells = [
   {
@@ -71,7 +71,6 @@ export default function GenreEnhancedTable() {
   const [scrollPosition, setScrollPosition] = React.useState(0);
 
   const getSelectedGenres = React.useCallback(() => {
-
     return (rows || []).filter(row => genreIds.includes(row.id));
   }, [genreIds, rows]);
 
@@ -87,10 +86,11 @@ export default function GenreEnhancedTable() {
     };
   }, []);
 
+  // mutation api
   const { data: genreData, isError, error } = useFetchAllGenresQuery();
-  const [addGenre, {isLoading: isAdding}] = useAddGenreMutation();
-  const [updateGenre, {isLoading: isUpdating}] = useUpdateGenreMutation();
-  const [deleteGenres, {isLoading: isDeleting}] = useDeleteGenresMutation();
+  const [addGenre, { isLoading: isAdding }] = useAddGenreMutation();
+  const [updateGenre, { isLoading: isUpdating }] = useUpdateGenreMutation();
+  const [deleteGenres, { isLoading: isDeleting }] = useDeleteGenresMutation();
 
   React.useEffect(() => {
     setTotalElements(genreData?.totalElements);
@@ -280,7 +280,6 @@ export default function GenreEnhancedTable() {
 
   return (
     <Box sx={{ width: '100%' }}>
-      { (isAdding || isUpdating || isDeleting) && <Loading type={"linear"} fullScreen/>}
       <Breadcrumb
         links={
           [{ link: "/admin", title: "Dashboard" }]
@@ -296,12 +295,13 @@ export default function GenreEnhancedTable() {
         handleClose={handleDeleteDialogClose}
         saveAble={saveAble}
         action={dialogAction}
+        isLoading={isDeleting}
       />
       <AlertDialog
         open={createDialogOpen}
         dialogTitle="Create new Genre"
         children={
-          <GenreForm
+          <SimpleForm
             action={dialogAction}
             originalState={editFormOriginalState}
             formState={editFormState}
@@ -311,12 +311,13 @@ export default function GenreEnhancedTable() {
         handleClose={handleCreateDialogClose}
         saveAble={saveAble}
         action={dialogAction}
+        isLoading={isAdding}
       />
       <AlertDialog
         open={editDialogOpen}
         dialogTitle="Edit a Genre"
         children={
-          <GenreForm
+          <SimpleForm
             action={dialogAction}
             originalState={editFormOriginalState}
             formState={editFormState}
@@ -326,6 +327,7 @@ export default function GenreEnhancedTable() {
         handleClose={handleEditDialogClose}
         saveAble={saveAble}
         action={dialogAction}
+        isLoading={isUpdating}
       />
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar

@@ -3,8 +3,8 @@ import Link from "./Link";
 
 const CardNumber = ({ link, title, data, sx }) => {
   return (
-    <Card sx={{ width: "30%" }}>
-      <CardActionArea sx={sx}>
+    <Card sx={{ border: "1px solid lightgray", ...sx }}>
+      <CardActionArea>
         <Link to={link} sx={{ p: 2, textDecoration: "none" }}>
           <CardContent>
             <Typography sx={{ fontSize: 14, fontWeight: "bold" }} color="text.secondary" gutterBottom>

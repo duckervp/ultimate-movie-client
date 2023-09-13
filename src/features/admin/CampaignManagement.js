@@ -13,15 +13,17 @@ import { FormControl, InputLabel, NativeSelect, Pagination } from '@mui/material
 import EnhancedTableToolbar from '../../components/EnhancedTableToolbar';
 import EnhancedTableHead from '../../components/EnhancedTableHead';
 import AlertDialog from '../../components/Dialog';
-import { Action } from '../../constants';
 import DeleteForm from './DeleteForm';
+import { Action } from '../../constants';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import BootstrapInput from '../../components/BootstrapInput';
 import Breadcrumb from '../../components/Breadcumb';
-import { toast } from 'react-toastify';
-import { getComparator, handleError, stableSort } from '../../utils';
-import SimpleForm from './SimpleForm';
-import { useAddProducerMutation, useDeleteProducersMutation, useFetchAllProducersQuery, useUpdateProducerMutation } from './slice/producerApiSlice';
 import Loading from '../../components/Loading';
+import { toast } from 'react-toastify';
+import { useFetchAllMoviesQuery } from "../user/slice/movieApiNoCredSlice";
+import { useDeleteMoviesMutation } from "./slice/movieApiSlice";
+import { getComparator, stableSort } from '../../utils';
+import { useFetchAllCampaignsQuery } from './slice/campaignApiSlice';
 
 const headCells = [
   {
@@ -33,39 +35,61 @@ const headCells = [
   {
     id: 'name',
     numeric: false,
-    disablePadding: false,
+    disablePadding: true,
     label: 'Name',
   },
   {
-    id: 'description',
+    id: 'status',
     numeric: false,
     disablePadding: false,
-    label: 'Description',
-  }
+    label: 'Status',
+  },
+  {
+    id: 'type',
+    numeric: false,
+    disablePadding: false,
+    label: 'Type',
+  },
+  {
+    id: 'providerName',
+    numeric: false,
+    disablePadding: false,
+    label: 'Provider Name',
+  },
 ];
 
-export default function ProducerEnhancedTable() {
+
+
+export default function CampaignManagement() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('No');
   const [selected, setSelected] = React.useState([]);
   const [dense, setDense] = React.useState(false);
-  const [pageNo, setPageNo] = React.useState(1);
   const [pageSize, setPageSize] = React.useState(10);
   const [totalElements, setTotalElements] = React.useState(0);
-  const [rows, setRows] = React.useState([]);
-  const [producerIds, setProducerIds] = React.useState([]);
-  const [editDialogOpen, setEditDialogOpen] = React.useState(false);
-  const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
+  const [movies, setMovies] = React.useState([]);
+  const [movieIds, setMovieIds] = React.useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
-  const [dialogAction, setDialogAction] = React.useState("");
-  const [editFormState, setEditFormState] = React.useState({ name: "", description: "" });
-  const [editFormOriginalState, setEditFormOriginalState] = React.useState({ name: "", description: "" });
-  const [saveAble, setSaveAble] = React.useState(false);
   const [scrollPosition, setScrollPosition] = React.useState(0);
+  const pageNo = searchParams.get("page") || 1;
 
-  const getSelectedProducers = React.useCallback(() => {
-    return rows.filter(row => producerIds.includes(row.id));
-  }, [producerIds, rows]);
+  const {
+    data: movieData,
+  } = useFetchAllCampaignsQuery();
+
+  const [deleteMovies, {isLoading: isDeleting}] = useDeleteMoviesMutation();
+
+  React.useEffect(() => {
+    setTotalElements(movieData?.totalElements);
+    const rowDatas = movieData?.results?.map((el, index) => ({ no: index + 1, ...el }));
+    setMovies(rowDatas);
+  }, [movieData]);
+
+  const getSelectedMovies = React.useCallback(() => {
+    return movies.filter(movie => movieIds.includes(movie.id));
+  }, [movieIds, movies]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -79,34 +103,6 @@ export default function ProducerEnhancedTable() {
     };
   }, []);
 
-  const { data: producerData, isError, error } = useFetchAllProducersQuery();
-  const [addProducer, { isLoading: isAdding }] = useAddProducerMutation();
-  const [updateProducer, { isLoading: isUpdating }] = useUpdateProducerMutation();
-  const [deleteProducers, { isLoading: isDeleting }] = useDeleteProducersMutation();
-
-  React.useEffect(() => {
-    setTotalElements(producerData?.totalElements);
-    const rowDatas = producerData?.results.map((item, index) => ({ no: index + 1, ...item }));
-    setRows(rowDatas || []);
-  }, [producerData]);
-
-  React.useEffect(() => {
-    if (isError) {
-      handleError(error);
-    }
-  }, [isError, error]);
-
-  React.useEffect(() => {
-    if (producerIds.length === 1 && rows.length > 0) {
-      const formState = getSelectedProducers()[0];
-      setEditFormState({ name: formState.name, description: formState.description });
-      setEditFormOriginalState({ name: formState.name, description: formState.description });
-    } else if (producerIds.length === 0) {
-      setEditFormState({ name: "", description: "" });
-      setEditFormOriginalState({ name: "", description: "" });
-    }
-  }, [rows, producerIds, getSelectedProducers]);
-
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
@@ -115,14 +111,14 @@ export default function ProducerEnhancedTable() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = rows.map((n) => n.no);
+      const newSelected = movies.map((n) => n.no);
       setSelected(newSelected);
-      const ids = rows.map((n) => n.id);
-      setProducerIds(ids);
+      const ids = movies.map((n) => n.id);
+      setMovieIds(ids);
       return;
     }
     setSelected([]);
-    setProducerIds([]);
+    setMovieIds([]);
   };
 
   const handleClick = (event, no, id) => {
@@ -132,30 +128,31 @@ export default function ProducerEnhancedTable() {
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, no);
-      ids = ids.concat(producerIds, id);
+      ids = ids.concat(movieIds, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
-      ids = ids.concat(producerIds.slice(1));
+      ids = ids.concat(movieIds.slice(1));
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1));
-      ids = ids.concat(producerIds.slice(0, -1));
+      ids = ids.concat(movieIds.slice(0, -1));
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
         selected.slice(selectedIndex + 1),
       );
       ids = ids.concat(
-        producerIds.slice(0, selectedIndex),
-        producerIds.slice(selectedIndex + 1),
+        movieIds.slice(0, selectedIndex),
+        movieIds.slice(selectedIndex + 1),
       );
     }
 
     setSelected(newSelected);
-    setProducerIds(ids);
+    setMovieIds(ids);
   };
 
   const handlePageChange = (event, newPage) => {
-    setPageNo(newPage);
+    searchParams.set("page", newPage);
+    navigate("/admin/movie?".concat(searchParams.toString()), { replace: true });
   };
 
   const handleChangeRowsPerPage = (event) => {
@@ -170,72 +167,39 @@ export default function ProducerEnhancedTable() {
 
   const visibleRows = React.useMemo(
     () =>
-      stableSort(rows, getComparator(order, orderBy)),
-    [rows, order, orderBy]
+      stableSort(movies, getComparator(order, orderBy)),
+    [movies, order, orderBy]
   );
 
-  const handleEditDialogSave = async () => {
-    if (setProducerIds.length === 1) {
-      try {
-        const producerId = producerIds[0];
-        const data = await updateProducer({ id: producerId, payload: editFormState }).unwrap();
-        const updatedRows = [...rows];
-        let index = 0;
-        for (let i = 0; i < updatedRows.length; i++) {
-          if (updatedRows[i].id === producerId) {
-            index = i;
-          }
-        }
-        const updatedRow = { ...updatedRows[index], ...data?.result };
-        updatedRows.splice(index, 1, updatedRow);
-        setRows(updatedRows);
-        setSelected([]);
-        setProducerIds([]);
-        toast.success("Producer updated successfully!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
-      } catch (error) {
-        toast.error("Cannot update the producer!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
-      }
-    }
-    handleEditDialogClose();
-  }
-
-  const handleEditDialogClose = () => {
-    setEditFormState(editFormOriginalState);
-    setEditDialogOpen(false);
-  }
-
-  const toggleEditDialogOpen = () => {
-    setDialogAction(Action.EDIT);
-    setEditDialogOpen(!editDialogOpen);
-  }
-
   const toggleDeleteDialogOpen = () => {
-    setDialogAction(Action.DELETE);
     setDeleteDialogOpen(!deleteDialogOpen);
   }
 
+  const toggleEditDialogOpen = () => {
+    const selectedItem = getSelectedMovies();
+    if (selectedItem.length > 0) {
+      navigate(`/admin/edit-movie/${selectedItem[0].slug}`, { replace: true });
+    }
+
+  }
+
   const toggleCreateDialogOpen = () => {
-    setDialogAction(Action.CREATE);
-    setCreateDialogOpen(!createDialogOpen);
+    navigate("/admin/create-movie", { replace: true });
   }
 
   const handleDeleteDialogProcess = async () => {
-    if (producerIds.length > 0) {
+    if (movieIds.length > 0) {
       try {
-        await deleteProducers(producerIds).unwrap();
-        const producers = rows.filter(row => !producerIds.includes(row.id)).map((row, index) => ({ ...row, no: index + 1 }));
-        setRows(producers);
+        await deleteMovies(movieIds).unwrap();
+        const rows = movies.filter(movie => !movieIds.includes(movie.id)).map((movie, index) => ({ ...movie, no: index + 1 }));
+        setMovies(rows);
         setSelected([]);
-        setProducerIds([]);
-        toast.success(producerIds.length > 1 ? "Producers deleted successfully!" : "Producer deleted successfully!", {
+        setMovieIds([]);
+        toast.success(movieIds.length > 1 ? "Movies deleted successfully!" : "Movie deleted successfully!", {
           position: toast.POSITION.TOP_RIGHT
         });
       } catch (error) {
-        toast.error(producerIds.length > 1 ? "Cannot delete the producers!" : "Cannot delete the producer!", {
+        toast.error(movieIds.length > 1 ? "Cannot delete the movies!" : "Cannot delete the movie!", {
           position: toast.POSITION.TOP_RIGHT
         });
       }
@@ -248,32 +212,13 @@ export default function ProducerEnhancedTable() {
     setDeleteDialogOpen(false);
   }
 
-  const handleCreateDialogClose = () => {
-    setCreateDialogOpen(false);
+  if (!searchParams.get("page")) {
+    searchParams.append("page", 1);
+    return <Loading />;
   }
 
-  const handleCreateDialogSave = async () => {
-    try {
-      const data = await addProducer(editFormState).unwrap();
-      const updatedRows = [...rows];
-      updatedRows.push({ ...data?.result, no: rows.length + 1 });
-      setRows(updatedRows);
-      setSelected([]);
-      setProducerIds([]);
-
-      handleCreateDialogClose();
-      toast.success("Producer created successfully!", {
-        position: toast.POSITION.TOP_RIGHT
-      });
-    } catch (error) {
-      toast.error("Cannot create the producer!", {
-        position: toast.POSITION.TOP_RIGHT
-      });
-    }
-  }
-
-  if (!rows) {
-    return <Loading fullScreen />
+  if (!movies) {
+    return <Loading />;
   }
 
   return (
@@ -282,54 +227,22 @@ export default function ProducerEnhancedTable() {
         links={
           [{ link: "/admin", title: "Dashboard" }]
         }
-        currentPage="Producer Management"
+        currentPage="Campaign"
         admin
       />
       <AlertDialog
         open={deleteDialogOpen}
-        dialogTitle="Delete Producer"
-        children={<DeleteForm names={getSelectedProducers().map(producer => producer.name)} />}
+        dialogTitle="Delete Movie"
+        children={<DeleteForm names={getSelectedMovies().map(movie => movie.name)} />}
         handleProcess={handleDeleteDialogProcess}
         handleClose={handleDeleteDialogClose}
-        saveAble={saveAble}
-        action={dialogAction}
+        saveAble={false}
+        action={Action.DELETE}
         isLoading={isDeleting}
-      />
-      <AlertDialog
-        open={createDialogOpen}
-        dialogTitle="Create new Producer"
-        children={
-          <SimpleForm
-            action={dialogAction}
-            originalState={editFormOriginalState}
-            formState={editFormState}
-            setFormState={setEditFormState}
-            toggleSaveAble={setSaveAble} />}
-        handleProcess={handleCreateDialogSave}
-        handleClose={handleCreateDialogClose}
-        saveAble={saveAble}
-        action={dialogAction}
-        isLoading={isAdding}
-      />
-      <AlertDialog
-        open={editDialogOpen}
-        dialogTitle="Edit a Producer"
-        children={
-          <SimpleForm
-            action={dialogAction}
-            originalState={editFormOriginalState}
-            formState={editFormState}
-            setFormState={setEditFormState}
-            toggleSaveAble={setSaveAble} />}
-        handleProcess={handleEditDialogSave}
-        handleClose={handleEditDialogClose}
-        saveAble={saveAble}
-        action={dialogAction}
-        isLoading={isUpdating}
       />
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar
-          title="Producer"
+          title="Campaigns"
           numSelected={selected.length}
           toggleCreateDialogOpen={toggleCreateDialogOpen}
           toggleEditDialogOpen={toggleEditDialogOpen}
@@ -348,12 +261,12 @@ export default function ProducerEnhancedTable() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={rows.length}
+              rowCount={movies.length}
               headCells={headCells}
-              ariaLabel={"select all producers"}
+              ariaLabel={"select all movies"}
             />
             <TableBody>
-              {visibleRows.map((row, index) => {
+              {visibleRows?.map((row, index) => {
                 const isItemSelected = isSelected(row.no);
                 const labelId = `enhanced-table-checkbox-${index}`;
 
@@ -387,8 +300,10 @@ export default function ProducerEnhancedTable() {
                     >
                       {row.no}
                     </TableCell>
-                    <TableCell align="left">{row.name}</TableCell>
-                    <TableCell align="left">{row.description}</TableCell>
+                    <TableCell align="left">{row?.name}</TableCell>
+                    <TableCell align="left">{row?.status}</TableCell>
+                    <TableCell align="right">{row?.type}</TableCell>
+                    <TableCell align="right">{row?.provider?.name ? row?.provider?.name : "N/A"}</TableCell>
                   </TableRow>
                 );
               })}
@@ -414,7 +329,7 @@ export default function ProducerEnhancedTable() {
               count={Math.ceil(totalElements / pageSize)}
               shape="rounded"
               variant="outlined"
-              page={pageNo}
+              page={Number.parseInt(searchParams.get("page") || 1)}
               onChange={handlePageChange}
             />
           }

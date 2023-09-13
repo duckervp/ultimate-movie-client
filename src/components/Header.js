@@ -60,11 +60,13 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
   },
 }));
 
+const APP_NAME = "ULTIMATE";
+
 const Header = ({ admin }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const user =  useSelector(selectCurrentUser);
-  
+  const user = useSelector(selectCurrentUser);
+
   const [searchValue, setSearchValue] = useState("");
 
 
@@ -89,7 +91,7 @@ const Header = ({ admin }) => {
         <Toolbar disableGutters>
           <AdbIcon sx={{ display: { xs: 'none', md: 'flex' }, mr: 1 }} />
           <Link to={"/"}
-            children={<Typography variant="h6" noWrap> MOVIE </Typography>}
+            children={<Typography variant="h6" noWrap> {APP_NAME} </Typography>}
             sx={{
               mr: 2,
               display: { xs: 'none', md: 'flex' },
@@ -118,7 +120,7 @@ const Header = ({ admin }) => {
 
           <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
           <Link to={"/"}
-            children={<Typography variant="h6" noWrap> MOVIE </Typography>}
+            children={<Typography variant="h6" noWrap> {APP_NAME} </Typography>}
             sx={{
               mr: 2,
               display: { xs: 'flex', md: 'none' },
@@ -135,13 +137,13 @@ const Header = ({ admin }) => {
             {
               user ?
                 <Tooltip title="Logout">
-                  <IconButton onClick={handleLogout} variant='outlined' color='inherit' sx={{backgroundColor: "gray", p: 0.7}}>
-                    <LogoutIcon style={{fontSize: 20}}/>
+                  <IconButton onClick={handleLogout} variant='outlined' color='inherit' sx={{ backgroundColor: "gray", p: 0.7 }}>
+                    <LogoutIcon style={{ fontSize: 20 }} />
                   </IconButton></Tooltip> :
                 <Link to="/login" sx={{ textDecoration: "none", color: "white" }} >
                   <Tooltip title="Login">
-                    <IconButton variant='outlined' color='inherit' sx={{backgroundColor: "gray", p: 0.7}}>
-                      <LoginIcon style={{fontSize: 20}} />
+                    <IconButton variant='outlined' color='inherit' sx={{ backgroundColor: "gray", p: 0.7 }}>
+                      <LoginIcon style={{ fontSize: 20 }} />
                     </IconButton>
                   </Tooltip>
                 </Link>

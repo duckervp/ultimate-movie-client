@@ -78,7 +78,7 @@ export default function EnhancedTable() {
     data: movieData,
   } = useFetchAllMoviesQuery({ pageNo, pageSize });
 
-  const [deleteMovies] = useDeleteMoviesMutation();
+  const [deleteMovies, {isLoading: isDeleting}] = useDeleteMoviesMutation();
 
   React.useEffect(() => {
     setTotalElements(movieData?.totalElements);
@@ -237,6 +237,7 @@ export default function EnhancedTable() {
         handleClose={handleDeleteDialogClose}
         saveAble={false}
         action={Action.DELETE}
+        isLoading={isDeleting}
       />
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar

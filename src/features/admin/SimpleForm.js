@@ -2,7 +2,7 @@ import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import { Action } from '../../constants';
 
-export default function GenreForm(props) {
+export default function SimpleForm(props) {
   const { action, originalState, formState, setFormState, toggleSaveAble } = props;
 
   const handleChange = (event) => {
@@ -25,7 +25,7 @@ export default function GenreForm(props) {
     <React.Fragment>
       <TextField
         required
-        id={`genreName-${ Date.now()}`}
+        id={`s-name-${ Date.now()}`}
         name="name"
         label="Name"
         defaultValue={formState.name}
@@ -36,7 +36,7 @@ export default function GenreForm(props) {
       />
       <TextField
         required
-        id={`genreDescription-${ Date.now()}`}
+        id={`s-description-${ Date.now()}`}
         name="description"
         label="Description"
         defaultValue={formState.description}

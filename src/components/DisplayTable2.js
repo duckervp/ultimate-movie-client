@@ -119,14 +119,21 @@ const DisplayTable2 = (props) => {
               // })
               ?.map((row) => (
                 <TableRow
-                  key={row[config.columns.at(config.keyIndex).field]}
+                  key={row[config.columns.at(config.keyIndex).field] + "-index-".concat(displayRows?.indexOf(row))}
                   sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                 >
                   {
-                    config.columns.map(col => <TableCell align={col.align || 'left'} key={col.field} component="th" scope="row" sx={col.displayImage && { display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                      {row[col.field]}
-                      {(col.displayImage && row[col.field]) && <img src={row[col.field]} alt={label} height={100} />}
-                    </TableCell>)
+                    config.columns.map(col =>
+                      <TableCell
+                        align={col.align || 'left'}
+                        key={col.field}
+                        component="th"
+                        scope="row"
+                        sx={col.displayImage && { display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        {row[col.field]}
+                        {(col.displayImage && row[col.field]) && <img src={row[col.field]} alt={label} height={100} />}
+                      </TableCell>
+                    )
                   }
                   <TableCell align="right">
                     <Button onClick={() => handleModify(row)}><TuneIcon /></Button>

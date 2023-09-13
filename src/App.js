@@ -23,6 +23,7 @@ import RequireAuth from './components/RequireAuth';
 import { Role } from './constants';
 import Unauthorized from './components/Unauthorized';
 import PersistedLogin from './components/PersistedLogin';
+import CampaignManagement from './features/admin/CampaignManagement';
 
 function App() {
   return (
@@ -52,6 +53,7 @@ function App() {
               <Route path="genre" element={<GenreEnhancedTable />} />
               <Route path="character" element={<AdminManagement />} />
               <Route path="producer" element={<ProducerEnhancedTable />} />
+              <Route path="campaign" element={<CampaignManagement />} />
             </Route>
           </Route>
         </Route>

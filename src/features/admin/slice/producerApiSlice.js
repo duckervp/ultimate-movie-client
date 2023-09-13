@@ -28,7 +28,6 @@ export const producerApiSlice = apiSlice.injectEndpoints({
     }),
     fetchAllProducers: builder.query({
       query: () => "/producers",
-      transformResponse: response => response.results,
     }),
   }),
 });
