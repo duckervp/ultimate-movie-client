@@ -1,11 +1,11 @@
 import { Card, CardActionArea, CardContent, Typography } from "@mui/material";
 import Link from "./Link";
 
-const CardNumber = ({ link, title, data, sx }) => {
+const CardNumber = ({ link, title, data}) => {
   return (
-    <Card sx={{ border: "1px solid lightgray", ...sx }}>
-      <CardActionArea>
-        <Link to={link} sx={{ p: 2, textDecoration: "none" }}>
+    <Link to={link} sx={{ textDecoration: "none" }}>
+      <Card sx={{ border: "1px solid lightgray"}}>
+        <CardActionArea sx={{p: 2}}>
           <CardContent>
             <Typography sx={{ fontSize: 14, fontWeight: "bold" }} color="text.secondary" gutterBottom>
               {title}
@@ -14,9 +14,9 @@ const CardNumber = ({ link, title, data, sx }) => {
               {data}
             </Typography>
           </CardContent>
-        </Link>
-      </CardActionArea>
-    </Card>
+        </CardActionArea>
+      </Card>
+    </Link>
   )
 }
 

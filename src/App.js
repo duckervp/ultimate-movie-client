@@ -24,6 +24,9 @@ import { Role } from './constants';
 import Unauthorized from './components/Unauthorized';
 import PersistedLogin from './components/PersistedLogin';
 import CampaignManagement from './features/admin/CampaignManagement';
+import NewCampaign from './features/admin/NewCampaign';
+import ProviderEnhancedTable from './features/admin/ProviderManagement';
+import ScheduleEnhancedTable from './features/admin/ScheduleManagement';
 
 function App() {
   return (
@@ -53,7 +56,11 @@ function App() {
               <Route path="genre" element={<GenreEnhancedTable />} />
               <Route path="character" element={<AdminManagement />} />
               <Route path="producer" element={<ProducerEnhancedTable />} />
+              <Route path="provider" element={<ProviderEnhancedTable />} />
+              <Route path="schedule" element={<ScheduleEnhancedTable />} />
               <Route path="campaign" element={<CampaignManagement />} />
+              <Route path="edit-campaign/:campaignId" element={<NewCampaign />} />
+              <Route path="create-campaign" element={<NewCampaign createNew />} />
             </Route>
           </Route>
         </Route>

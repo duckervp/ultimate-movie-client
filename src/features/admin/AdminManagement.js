@@ -14,19 +14,22 @@ const AdminManagement = () => {
 
       <Grid container rowSpacing={{ xs: 1, sm: 2, md: 3 }} columnSpacing={{ xs: 1, sm: 2, md: 3 }} className="Home" sx={{ mt: 2, textAlign: "center" }}>
         <Grid lg={4} md={6} xs={12}>
-          <CardNumber link="/admin/movie" title="Total Movies" data={18} />
+          <CardNumber link="/admin/movie" title="Total Movies" data={18}/>
         </Grid>
-        <Grid lg={4} md={6} xs={12} sx={{}}>
-          <CardNumber link="/admin/genre" title="Total Genres" data={20} />
+        <Grid lg={4} md={6} xs={12}>
+          <CardNumber link="/admin/genre" title="Total Genres" data={20}/>
         </Grid>
-        <Grid lg={4} md={6} xs={12} sx={{}}>
+        <Grid lg={4} md={6} xs={12}>
           <CardNumber link="/admin/producer" title="Total Producers" data={2} />
         </Grid>
-        <Grid lg={4} md={6} xs={12} sx={{}}>
+        <Grid lg={4} md={6} xs={12}>
+          <CardNumber link="/admin/provider" title="Total Providers" data={2} />
+        </Grid>
+        <Grid lg={4} md={6} xs={12}>
           <CardNumber link="/admin/campaign" title="Active Campaigns" data={2} />
         </Grid>
-        <Grid lg={4} md={6} xs={12} sx={{}}>
-          <CardNumber link="/admin/cron" title="Active Crons" data={2} />
+        <Grid lg={4} md={6} xs={12}>
+          <CardNumber link="/admin/schedule" title="Active Crons" data={2} />
         </Grid>
       </Grid>
     </Box>

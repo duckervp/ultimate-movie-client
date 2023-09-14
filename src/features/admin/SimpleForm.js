@@ -25,7 +25,7 @@ export default function SimpleForm(props) {
     <React.Fragment>
       <TextField
         required
-        id={`s-name-${ Date.now()}`}
+        id={`s-name-${ Math.random()}`}
         name="name"
         label="Name"
         defaultValue={formState.name}
@@ -36,7 +36,7 @@ export default function SimpleForm(props) {
       />
       <TextField
         required
-        id={`s-description-${ Date.now()}`}
+        id={`s-description-${ Math.random()}`}
         name="description"
         label="Description"
         defaultValue={formState.description}

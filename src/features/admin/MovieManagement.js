@@ -24,7 +24,7 @@ import { useFetchAllMoviesQuery } from "../user/slice/movieApiNoCredSlice";
 import { useDeleteMoviesMutation } from "./slice/movieApiSlice";
 import { getComparator, stableSort } from '../../utils';
 
-const headCells = [
+const HEAD_CELLS= [
   {
     id: 'No',
     numeric: false,
@@ -34,7 +34,7 @@ const headCells = [
   {
     id: 'name',
     numeric: false,
-    disablePadding: true,
+    disablePadding: false,
     label: 'Name',
   },
   {
@@ -261,7 +261,7 @@ export default function EnhancedTable() {
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={movies.length}
-              headCells={headCells}
+              headCells={HEAD_CELLS}
               ariaLabel={"select all movies"}
             />
             <TableBody>
@@ -299,10 +299,14 @@ export default function EnhancedTable() {
                     >
                       {row.no}
                     </TableCell>
-                    <TableCell align="left">{row.name}</TableCell>
-                    <TableCell align="left">{row.country}</TableCell>
-                    <TableCell align="right">{row.totalEpisode}</TableCell>
-                    <TableCell align="right">{row.releaseYear ? row.releaseYear : "N/A"}</TableCell>
+                    {
+                      HEAD_CELLS.map(cell => {
+                        if (cell.id !== 'No') {
+                          return (<TableCell key={Math.random()} align={cell.numeric ? 'right' : 'left'}> {row[cell.id]} </TableCell>);
+                        }
+                        return undefined;
+                      })
+                    }
                   </TableRow>
                 );
               })}

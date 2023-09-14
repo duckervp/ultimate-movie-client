@@ -19,13 +19,10 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import BootstrapInput from '../../components/BootstrapInput';
 import Breadcrumb from '../../components/Breadcumb';
 import Loading from '../../components/Loading';
-import { toast } from 'react-toastify';
-import { useFetchAllMoviesQuery } from "../user/slice/movieApiNoCredSlice";
-import { useDeleteMoviesMutation } from "./slice/movieApiSlice";
-import { getComparator, stableSort } from '../../utils';
-import { useFetchAllCampaignsQuery } from './slice/campaignApiSlice';
+import { getComparator, handleError, showSuccessMessage, stableSort } from '../../utils';
+import { useDeleteCampaignsMutation, useFetchAllCampaignsQuery } from './slice/campaignApiSlice';
 
-const headCells = [
+const HEAD_CELLS = [
   {
     id: 'No',
     numeric: false,
@@ -35,7 +32,7 @@ const headCells = [
   {
     id: 'name',
     numeric: false,
-    disablePadding: true,
+    disablePadding: false,
     label: 'Name',
   },
   {
@@ -69,27 +66,27 @@ export default function CampaignManagement() {
   const [dense, setDense] = React.useState(false);
   const [pageSize, setPageSize] = React.useState(10);
   const [totalElements, setTotalElements] = React.useState(0);
-  const [movies, setMovies] = React.useState([]);
-  const [movieIds, setMovieIds] = React.useState([]);
+  const [campaigns, setCampaigns] = React.useState([]);
+  const [campaignIds, setCampaignIds] = React.useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [scrollPosition, setScrollPosition] = React.useState(0);
   const pageNo = searchParams.get("page") || 1;
 
   const {
-    data: movieData,
-  } = useFetchAllCampaignsQuery();
+    data: campaignData,
+  } = useFetchAllCampaignsQuery({ pageNo, pageSize });
 
-  const [deleteMovies, {isLoading: isDeleting}] = useDeleteMoviesMutation();
+  const [deleteCampaigns, { isLoading: isDeleting }] = useDeleteCampaignsMutation();
 
   React.useEffect(() => {
-    setTotalElements(movieData?.totalElements);
-    const rowDatas = movieData?.results?.map((el, index) => ({ no: index + 1, ...el }));
-    setMovies(rowDatas);
-  }, [movieData]);
+    setTotalElements(campaignData?.totalElements);
+    const rowDatas = campaignData?.results?.map((el, index) => ({ no: index + 1, ...el }));
+    setCampaigns(rowDatas);
+  }, [campaignData]);
 
-  const getSelectedMovies = React.useCallback(() => {
-    return movies.filter(movie => movieIds.includes(movie.id));
-  }, [movieIds, movies]);
+  const getSelectedCampaigns = React.useCallback(() => {
+    return campaigns.filter(campaign => campaignIds.includes(campaign.id));
+  }, [campaignIds, campaigns]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -111,14 +108,14 @@ export default function CampaignManagement() {
 
   const handleSelectAllClick = (event) => {
     if (event.target.checked) {
-      const newSelected = movies.map((n) => n.no);
+      const newSelected = campaigns.map((n) => n.no);
       setSelected(newSelected);
-      const ids = movies.map((n) => n.id);
-      setMovieIds(ids);
+      const ids = campaigns.map((n) => n.id);
+      setCampaignIds(ids);
       return;
     }
     setSelected([]);
-    setMovieIds([]);
+    setCampaignIds([]);
   };
 
   const handleClick = (event, no, id) => {
@@ -128,31 +125,31 @@ export default function CampaignManagement() {
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, no);
-      ids = ids.concat(movieIds, id);
+      ids = ids.concat(campaignIds, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
-      ids = ids.concat(movieIds.slice(1));
+      ids = ids.concat(campaignIds.slice(1));
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1));
-      ids = ids.concat(movieIds.slice(0, -1));
+      ids = ids.concat(campaignIds.slice(0, -1));
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
         selected.slice(selectedIndex + 1),
       );
       ids = ids.concat(
-        movieIds.slice(0, selectedIndex),
-        movieIds.slice(selectedIndex + 1),
+        campaignIds.slice(0, selectedIndex),
+        campaignIds.slice(selectedIndex + 1),
       );
     }
 
     setSelected(newSelected);
-    setMovieIds(ids);
+    setCampaignIds(ids);
   };
 
   const handlePageChange = (event, newPage) => {
     searchParams.set("page", newPage);
-    navigate("/admin/movie?".concat(searchParams.toString()), { replace: true });
+    navigate("/admin/campaign?".concat(searchParams.toString()), { replace: true });
   };
 
   const handleChangeRowsPerPage = (event) => {
@@ -167,8 +164,8 @@ export default function CampaignManagement() {
 
   const visibleRows = React.useMemo(
     () =>
-      stableSort(movies, getComparator(order, orderBy)),
-    [movies, order, orderBy]
+      stableSort(campaigns, getComparator(order, orderBy)),
+    [campaigns, order, orderBy]
   );
 
   const toggleDeleteDialogOpen = () => {
@@ -176,32 +173,32 @@ export default function CampaignManagement() {
   }
 
   const toggleEditDialogOpen = () => {
-    const selectedItem = getSelectedMovies();
+    const selectedItem = getSelectedCampaigns();
     if (selectedItem.length > 0) {
-      navigate(`/admin/edit-movie/${selectedItem[0].slug}`, { replace: true });
+      navigate(`/admin/edit-campaign/${selectedItem[0].id}`, { replace: true });
     }
 
   }
 
   const toggleCreateDialogOpen = () => {
-    navigate("/admin/create-movie", { replace: true });
+    navigate("/admin/create-campaign", { replace: true });
   }
 
   const handleDeleteDialogProcess = async () => {
-    if (movieIds.length > 0) {
+    if (campaignIds.length > 0) {
       try {
-        await deleteMovies(movieIds).unwrap();
-        const rows = movies.filter(movie => !movieIds.includes(movie.id)).map((movie, index) => ({ ...movie, no: index + 1 }));
-        setMovies(rows);
+        await deleteCampaigns(campaignIds).unwrap();
+        const rows = campaigns.filter(campaign => !campaignIds.includes(campaign.id))
+          .map((campaign, index) => ({ ...campaign, no: index + 1 }));
+        setCampaigns(rows);
         setSelected([]);
-        setMovieIds([]);
-        toast.success(movieIds.length > 1 ? "Movies deleted successfully!" : "Movie deleted successfully!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
+        setCampaignIds([]);
+
+        const successMessage = campaignIds.length > 1 ? "Campaigns deleted successfully!" : "Campaign deleted successfully!";
+        showSuccessMessage(successMessage);
       } catch (error) {
-        toast.error(movieIds.length > 1 ? "Cannot delete the movies!" : "Cannot delete the movie!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
+        const errorMessage = campaignIds.length > 1 ? "Cannot delete the campaigns!" : "Cannot delete the campaign!";
+        handleError(error, errorMessage);
       }
     }
 
@@ -217,7 +214,7 @@ export default function CampaignManagement() {
     return <Loading />;
   }
 
-  if (!movies) {
+  if (!campaigns) {
     return <Loading />;
   }
 
@@ -232,8 +229,8 @@ export default function CampaignManagement() {
       />
       <AlertDialog
         open={deleteDialogOpen}
-        dialogTitle="Delete Movie"
-        children={<DeleteForm names={getSelectedMovies().map(movie => movie.name)} />}
+        dialogTitle="Delete Campaign"
+        children={<DeleteForm names={getSelectedCampaigns().map(campaign => campaign.name)} />}
         handleProcess={handleDeleteDialogProcess}
         handleClose={handleDeleteDialogClose}
         saveAble={false}
@@ -261,9 +258,9 @@ export default function CampaignManagement() {
               orderBy={orderBy}
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
-              rowCount={movies.length}
-              headCells={headCells}
-              ariaLabel={"select all movies"}
+              rowCount={campaigns.length}
+              headCells={HEAD_CELLS}
+              ariaLabel={"select all campaigns"}
             />
             <TableBody>
               {visibleRows?.map((row, index) => {
@@ -300,10 +297,17 @@ export default function CampaignManagement() {
                     >
                       {row.no}
                     </TableCell>
-                    <TableCell align="left">{row?.name}</TableCell>
-                    <TableCell align="left">{row?.status}</TableCell>
-                    <TableCell align="right">{row?.type}</TableCell>
-                    <TableCell align="right">{row?.provider?.name ? row?.provider?.name : "N/A"}</TableCell>
+                    {
+                      HEAD_CELLS.map(cell => {
+                        if (cell.id !== 'No') {
+                          if (cell.id === "providerName") {
+                            return (<TableCell key={Math.random()} align={cell.numeric ? 'right' : 'left'}> {row.provider?.name} </TableCell>);
+                          }
+                          return (<TableCell key={Math.random()} align={cell.numeric ? 'right' : 'left'}> {row[cell.id]} </TableCell>);
+                        }
+                        return undefined;
+                      })
+                    }
                   </TableRow>
                 );
               })}

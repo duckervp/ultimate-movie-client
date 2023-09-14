@@ -62,7 +62,6 @@ const style = {
 
 const getStyle = (fullScreen) => {
   if (fullScreen === true) {
-    console.log("Loading full screen...");
     style.height = "100vh";
   }
   return style;

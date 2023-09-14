@@ -19,11 +19,11 @@ import BootstrapInput from '../../components/BootstrapInput';
 import Breadcrumb from '../../components/Breadcumb';
 import { toast } from 'react-toastify';
 import { getComparator, handleError, stableSort } from '../../utils';
-import SimpleForm from './SimpleForm';
-import { useAddProducerMutation, useDeleteProducersMutation, useFetchAllProducersQuery, useUpdateProducerMutation } from './slice/producerApiSlice';
 import Loading from '../../components/Loading';
+import { useAddScheduleMutation, useDeleteSchedulesMutation, useFetchAllSchedulesQuery, useUpdateScheduleMutation } from './slice/scheduleApiSlice';
+import ScheduleForm from './ScheduleForm';
 
-const headCells = [
+const HEAD_CELLS = [
   {
     id: 'No',
     numeric: false,
@@ -31,20 +31,32 @@ const headCells = [
     label: 'No',
   },
   {
-    id: 'name',
+    id: 'cronExpression',
     numeric: false,
     disablePadding: false,
-    label: 'Name',
+    label: 'Cron Expression',
   },
   {
-    id: 'description',
+    id: 'method',
     numeric: false,
     disablePadding: false,
-    label: 'Description',
-  }
+    label: 'Method',
+  },
+  {
+    id: 'url',
+    numeric: false,
+    disablePadding: false,
+    label: 'URL',
+  },
+  {
+    id: 'status',
+    numeric: false,
+    disablePadding: false,
+    label: 'Status',
+  },
 ];
 
-export default function ProducerEnhancedTable() {
+export default function ScheduleEnhancedTable() {
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('No');
   const [selected, setSelected] = React.useState([]);
@@ -53,19 +65,19 @@ export default function ProducerEnhancedTable() {
   const [pageSize, setPageSize] = React.useState(10);
   const [totalElements, setTotalElements] = React.useState(0);
   const [rows, setRows] = React.useState([]);
-  const [producerIds, setProducerIds] = React.useState([]);
+  const [scheduleIds, setScheduleIds] = React.useState([]);
   const [editDialogOpen, setEditDialogOpen] = React.useState(false);
   const [createDialogOpen, setCreateDialogOpen] = React.useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
   const [dialogAction, setDialogAction] = React.useState("");
-  const [formState, setFormState] = React.useState({ name: "", description: "" });
-  const [formOriginalState, setFormOriginalState] = React.useState({ name: "", description: "" });
+  const [formState, setFormState] = React.useState({});
+  const [formOriginalState, setFormOriginalState] = React.useState({});
   const [saveAble, setSaveAble] = React.useState(false);
   const [scrollPosition, setScrollPosition] = React.useState(0);
 
-  const getSelectedProducers = React.useCallback(() => {
-    return rows.filter(row => producerIds.includes(row.id));
-  }, [producerIds, rows]);
+  const getSelectedSchedules = React.useCallback(() => {
+    return rows.filter(row => scheduleIds.includes(row.id));
+  }, [scheduleIds, rows]);
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -79,16 +91,16 @@ export default function ProducerEnhancedTable() {
     };
   }, []);
 
-  const { data: producerData, isError, error } = useFetchAllProducersQuery();
-  const [addProducer, { isLoading: isAdding }] = useAddProducerMutation();
-  const [updateProducer, { isLoading: isUpdating }] = useUpdateProducerMutation();
-  const [deleteProducers, { isLoading: isDeleting }] = useDeleteProducersMutation();
+  const { data: scheduleData, isError, error } = useFetchAllSchedulesQuery();
+  const [addSchedule, { isLoading: isAdding }] = useAddScheduleMutation();
+  const [updateSchedule, { isLoading: isUpdating }] = useUpdateScheduleMutation();
+  const [deleteSchedules, { isLoading: isDeleting }] = useDeleteSchedulesMutation();
 
   React.useEffect(() => {
-    setTotalElements(producerData?.totalElements);
-    const rowDatas = producerData?.results.map((item, index) => ({ no: index + 1, ...item }));
+    setTotalElements(scheduleData?.totalElements);
+    const rowDatas = scheduleData?.results.map((item, index) => ({ no: index + 1, ...item }));
     setRows(rowDatas || []);
-  }, [producerData]);
+  }, [scheduleData]);
 
   React.useEffect(() => {
     if (isError) {
@@ -97,15 +109,15 @@ export default function ProducerEnhancedTable() {
   }, [isError, error]);
 
   React.useEffect(() => {
-    if (producerIds.length === 1 && rows.length > 0) {
-      const formState = getSelectedProducers()[0];
-      setFormState({ name: formState.name, description: formState.description });
-      setFormOriginalState({ name: formState.name, description: formState.description });
-    } else if (producerIds.length === 0) {
-      setFormState({ name: "", description: "" });
-      setFormOriginalState({ name: "", description: "" });
+    if (scheduleIds.length === 1 && rows.length > 0) {
+      const formState1 = getSelectedSchedules()[0];
+      setFormState({ ...formState1 });
+      setFormOriginalState({ ...formState1 });
+    } else if (scheduleIds.length === 0) {
+      setFormState({});
+      setFormOriginalState({});
     }
-  }, [rows, producerIds, getSelectedProducers]);
+  }, [rows, scheduleIds, getSelectedSchedules]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -118,11 +130,11 @@ export default function ProducerEnhancedTable() {
       const newSelected = rows.map((n) => n.no);
       setSelected(newSelected);
       const ids = rows.map((n) => n.id);
-      setProducerIds(ids);
+      setScheduleIds(ids);
       return;
     }
     setSelected([]);
-    setProducerIds([]);
+    setScheduleIds([]);
   };
 
   const handleClick = (event, no, id) => {
@@ -132,26 +144,26 @@ export default function ProducerEnhancedTable() {
 
     if (selectedIndex === -1) {
       newSelected = newSelected.concat(selected, no);
-      ids = ids.concat(producerIds, id);
+      ids = ids.concat(scheduleIds, id);
     } else if (selectedIndex === 0) {
       newSelected = newSelected.concat(selected.slice(1));
-      ids = ids.concat(producerIds.slice(1));
+      ids = ids.concat(scheduleIds.slice(1));
     } else if (selectedIndex === selected.length - 1) {
       newSelected = newSelected.concat(selected.slice(0, -1));
-      ids = ids.concat(producerIds.slice(0, -1));
+      ids = ids.concat(scheduleIds.slice(0, -1));
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
         selected.slice(selectedIndex + 1),
       );
       ids = ids.concat(
-        producerIds.slice(0, selectedIndex),
-        producerIds.slice(selectedIndex + 1),
+        scheduleIds.slice(0, selectedIndex),
+        scheduleIds.slice(selectedIndex + 1),
       );
     }
 
     setSelected(newSelected);
-    setProducerIds(ids);
+    setScheduleIds(ids);
   };
 
   const handlePageChange = (event, newPage) => {
@@ -175,14 +187,14 @@ export default function ProducerEnhancedTable() {
   );
 
   const handleEditDialogSave = async () => {
-    if (setProducerIds.length === 1) {
+    if (setScheduleIds.length === 1) {
       try {
-        const producerId = producerIds[0];
-        const data = await updateProducer({ id: producerId, payload: formState }).unwrap();
+        const providerId = scheduleIds[0];
+        const data = await updateSchedule({ id: providerId, payload: formState }).unwrap();
         const updatedRows = [...rows];
         let index = 0;
         for (let i = 0; i < updatedRows.length; i++) {
-          if (updatedRows[i].id === producerId) {
+          if (updatedRows[i].id === providerId) {
             index = i;
           }
         }
@@ -190,12 +202,12 @@ export default function ProducerEnhancedTable() {
         updatedRows.splice(index, 1, updatedRow);
         setRows(updatedRows);
         setSelected([]);
-        setProducerIds([]);
-        toast.success("Producer updated successfully!", {
+        setScheduleIds([]);
+        toast.success("Provider updated successfully!", {
           position: toast.POSITION.TOP_RIGHT
         });
       } catch (error) {
-        toast.error("Cannot update the producer!", {
+        toast.error("Cannot update the provider!", {
           position: toast.POSITION.TOP_RIGHT
         });
       }
@@ -204,7 +216,7 @@ export default function ProducerEnhancedTable() {
   }
 
   const handleEditDialogClose = () => {
-    setFormState(formOriginalState);
+    setFormState({});
     setEditDialogOpen(false);
   }
 
@@ -224,18 +236,18 @@ export default function ProducerEnhancedTable() {
   }
 
   const handleDeleteDialogProcess = async () => {
-    if (producerIds.length > 0) {
+    if (scheduleIds.length > 0) {
       try {
-        await deleteProducers(producerIds).unwrap();
-        const producers = rows.filter(row => !producerIds.includes(row.id)).map((row, index) => ({ ...row, no: index + 1 }));
-        setRows(producers);
+        await deleteSchedules(scheduleIds).unwrap();
+        const providers = rows.filter(row => !scheduleIds.includes(row.id)).map((row, index) => ({ ...row, no: index + 1 }));
+        setRows(providers);
         setSelected([]);
-        setProducerIds([]);
-        toast.success(producerIds.length > 1 ? "Producers deleted successfully!" : "Producer deleted successfully!", {
+        setScheduleIds([]);
+        toast.success(scheduleIds.length > 1 ? "Providers deleted successfully!" : "Provider deleted successfully!", {
           position: toast.POSITION.TOP_RIGHT
         });
       } catch (error) {
-        toast.error(producerIds.length > 1 ? "Cannot delete the producers!" : "Cannot delete the producer!", {
+        toast.error(scheduleIds.length > 1 ? "Cannot delete the providers!" : "Cannot delete the provider!", {
           position: toast.POSITION.TOP_RIGHT
         });
       }
@@ -255,19 +267,19 @@ export default function ProducerEnhancedTable() {
 
   const handleCreateDialogSave = async () => {
     try {
-      const data = await addProducer(formState).unwrap();
+      const data = await addSchedule(formState).unwrap();
       const updatedRows = [...rows];
       updatedRows.push({ ...data?.result, no: rows.length + 1 });
       setRows(updatedRows);
       setSelected([]);
-      setProducerIds([]);
+      setScheduleIds([]);
 
       handleCreateDialogClose();
-      toast.success("Producer created successfully!", {
+      toast.success("Provider created successfully!", {
         position: toast.POSITION.TOP_RIGHT
       });
     } catch (error) {
-      toast.error("Cannot create the producer!", {
+      toast.error("Cannot create the provider!", {
         position: toast.POSITION.TOP_RIGHT
       });
     }
@@ -283,13 +295,13 @@ export default function ProducerEnhancedTable() {
         links={
           [{ link: "/admin", title: "Dashboard" }]
         }
-        currentPage="Producer Management"
+        currentPage="Schedule Management"
         admin
       />
       <AlertDialog
         open={deleteDialogOpen}
-        dialogTitle="Delete Producer"
-        children={<DeleteForm names={getSelectedProducers().map(producer => producer.name)} />}
+        dialogTitle="Delete Schedule"
+        children={<DeleteForm names={getSelectedSchedules().map(item => item.name)} />}
         handleProcess={handleDeleteDialogProcess}
         handleClose={handleDeleteDialogClose}
         saveAble={saveAble}
@@ -298,14 +310,16 @@ export default function ProducerEnhancedTable() {
       />
       <AlertDialog
         open={createDialogOpen}
-        dialogTitle="Create new Producer"
+        dialogTitle="Create Schedule"
         children={
-          <SimpleForm
+          <ScheduleForm
             action={dialogAction}
             originalState={formOriginalState}
             formState={formState}
             setFormState={setFormState}
-            toggleSaveAble={setSaveAble} />}
+            toggleSaveAble={setSaveAble}
+          />
+        }
         handleProcess={handleCreateDialogSave}
         handleClose={handleCreateDialogClose}
         saveAble={saveAble}
@@ -314,14 +328,15 @@ export default function ProducerEnhancedTable() {
       />
       <AlertDialog
         open={editDialogOpen}
-        dialogTitle="Edit a Producer"
+        dialogTitle="Edit Provider"
         children={
-          <SimpleForm
+          <ScheduleForm
             action={dialogAction}
             originalState={formOriginalState}
             formState={formState}
             setFormState={setFormState}
-            toggleSaveAble={setSaveAble} />}
+            toggleSaveAble={setSaveAble}
+          />}
         handleProcess={handleEditDialogSave}
         handleClose={handleEditDialogClose}
         saveAble={saveAble}
@@ -330,7 +345,7 @@ export default function ProducerEnhancedTable() {
       />
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar
-          title="Producer"
+          title="Provider"
           numSelected={selected.length}
           toggleCreateDialogOpen={toggleCreateDialogOpen}
           toggleEditDialogOpen={toggleEditDialogOpen}
@@ -350,8 +365,8 @@ export default function ProducerEnhancedTable() {
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
-              headCells={headCells}
-              ariaLabel={"select all producers"}
+              headCells={HEAD_CELLS}
+              ariaLabel={"select all providers"}
             />
             <TableBody>
               {visibleRows.map((row, index) => {
@@ -388,8 +403,14 @@ export default function ProducerEnhancedTable() {
                     >
                       {row.no}
                     </TableCell>
-                    <TableCell align="left">{row.name}</TableCell>
-                    <TableCell align="left">{row.description}</TableCell>
+                    {
+                      HEAD_CELLS.map(cell => {
+                        if (cell.id !== 'No') {
+                          return (<TableCell key={Math.random()} align={cell.numeric ? 'right' : 'left'}> {row[cell.id]} </TableCell>);
+                        }
+                        return undefined;
+                      })
+                    }
                   </TableRow>
                 );
               })}

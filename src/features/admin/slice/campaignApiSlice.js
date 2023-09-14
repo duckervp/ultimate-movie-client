@@ -6,6 +6,9 @@ export const campaignApiSlice = apiSlice.injectEndpoints({
     fetchAllCampaigns: builder.query({
       query: () => `/campaigns`,
     }),
+    fetchCampaign: builder.query({
+      query: (id) => `/campaigns/${id}`,
+    }),
     addCampaign: builder.mutation({
       query: payload => ({
         url: `/campaigns`,
@@ -37,4 +40,5 @@ export const {
   useAddCampaignMutation,
   useUpdateCampaignMutation,
   useDeleteCampaignsMutation,
+  useFetchCampaignQuery,
 } = campaignApiSlice;

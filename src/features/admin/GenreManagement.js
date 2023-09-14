@@ -24,7 +24,7 @@ import Loading from '../../components/Loading';
 import { useAddGenreMutation, useDeleteGenresMutation, useUpdateGenreMutation } from "./slice/genreApiSlice";
 import SimpleForm from './SimpleForm';
 
-const headCells = [
+const HEAD_CELLS = [
   {
     id: 'No',
     numeric: false,
@@ -351,7 +351,7 @@ export default function GenreEnhancedTable() {
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
-              headCells={headCells}
+              headCells={HEAD_CELLS}
               ariaLabel={"select all genres"}
             />
             <TableBody>
@@ -389,9 +389,14 @@ export default function GenreEnhancedTable() {
                     >
                       {row.no}
                     </TableCell>
-                    <TableCell align="left">{row.name}</TableCell>
-                    <TableCell align="left">{row.description}</TableCell>
-                    <TableCell align="left">{row.slug}</TableCell>
+                    {
+                      HEAD_CELLS.map(cell => {
+                        if (cell.id !== 'No') {
+                          return (<TableCell key={Math.random()} align={cell.numeric ? 'right' : 'left'}> {row[cell.id]} </TableCell>);
+                        }
+                        return undefined;
+                      })
+                    }
                   </TableRow>
                 );
               })}
