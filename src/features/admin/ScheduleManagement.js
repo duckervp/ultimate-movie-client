@@ -18,7 +18,7 @@ import DeleteForm from './DeleteForm';
 import BootstrapInput from '../../components/BootstrapInput';
 import Breadcrumb from '../../components/Breadcumb';
 import { toast } from 'react-toastify';
-import { getComparator, handleError, stableSort } from '../../utils';
+import { getComparator, handleError, showSuccessMessage, stableSort } from '../../utils';
 import Loading from '../../components/Loading';
 import { useAddScheduleMutation, useDeleteSchedulesMutation, useFetchAllSchedulesQuery, useUpdateScheduleMutation } from './slice/scheduleApiSlice';
 import ScheduleForm from './ScheduleForm';
@@ -29,6 +29,12 @@ const HEAD_CELLS = [
     numeric: false,
     disablePadding: true,
     label: 'No',
+  },
+  {
+    id: 'name',
+    numeric: false,
+    disablePadding: false,
+    label: 'Name',
   },
   {
     id: 'cronExpression',
@@ -203,11 +209,11 @@ export default function ScheduleEnhancedTable() {
         setRows(updatedRows);
         setSelected([]);
         setScheduleIds([]);
-        toast.success("Provider updated successfully!", {
+        toast.success("Schedule updated successfully!", {
           position: toast.POSITION.TOP_RIGHT
         });
       } catch (error) {
-        toast.error("Cannot update the provider!", {
+        toast.error("Cannot update the schedule!", {
           position: toast.POSITION.TOP_RIGHT
         });
       }
@@ -238,16 +244,16 @@ export default function ScheduleEnhancedTable() {
   const handleDeleteDialogProcess = async () => {
     if (scheduleIds.length > 0) {
       try {
+        console.log(scheduleIds);
         await deleteSchedules(scheduleIds).unwrap();
         const providers = rows.filter(row => !scheduleIds.includes(row.id)).map((row, index) => ({ ...row, no: index + 1 }));
         setRows(providers);
         setSelected([]);
         setScheduleIds([]);
-        toast.success(scheduleIds.length > 1 ? "Providers deleted successfully!" : "Provider deleted successfully!", {
-          position: toast.POSITION.TOP_RIGHT
-        });
+        const successMessage = scheduleIds.length > 1 ? "Schedules deleted successfully!" : "Schedule deleted successfully!";
+        showSuccessMessage(successMessage);
       } catch (error) {
-        toast.error(scheduleIds.length > 1 ? "Cannot delete the providers!" : "Cannot delete the provider!", {
+        toast.error(scheduleIds.length > 1 ? "Cannot delete the schedules!" : "Cannot delete the schedule!", {
           position: toast.POSITION.TOP_RIGHT
         });
       }

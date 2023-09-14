@@ -6,7 +6,7 @@ const DeleteForm = (props) => {
   return (
     <Box>
       <Typography component={"span"} sx={{fontWeight: "bold"}}>Are you sure to delete</Typography>
-      {names.map(name => (<Typography key={name} component={"span"} color="red" sx={{ marginLeft: "5px" }}>[ {name} ]</Typography>))} ?
+      {names.map(name => (<Typography key={Math.random()} component={"span"} color="red" sx={{ marginLeft: "5px" }}>[ {name} ]</Typography>))} ?
     </Box>
   );
 }
