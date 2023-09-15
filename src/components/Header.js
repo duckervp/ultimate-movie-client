@@ -9,7 +9,7 @@ import Tooltip from '@mui/material/Tooltip';
 import AdbIcon from '@mui/icons-material/Adb';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { useNavigate } from "react-router-dom";
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import Link from './Link';
 import { Badge, InputBase, alpha } from '@mui/material';
 import styled from '@emotion/styled';
@@ -18,7 +18,8 @@ import { useState } from 'react';
 import LogoutIcon from '@mui/icons-material/Logout';
 import LoginIcon from '@mui/icons-material/Login';
 import UserAvatar from './UserAvartar';
-import { logout, selectCurrentUser } from '../features/auth/slice/authSlice';
+import { selectCurrentUser } from '../features/auth/slice/authSlice';
+import useLogout from '../hooks/useLogout';
 
 const Search = styled('div')(({ theme }) => ({
   position: 'relative',
@@ -63,15 +64,16 @@ const StyledInputBase = styled(InputBase)(({ theme }) => ({
 const APP_NAME = "ULTIMATE";
 
 const Header = ({ admin }) => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
   const user = useSelector(selectCurrentUser);
 
   const [searchValue, setSearchValue] = useState("");
 
+  const signOut = useLogout();
+
 
   const handleLogout = () => {
-    dispatch(logout());
+    signOut();
     navigate("/login", { replace: true });
   }
 

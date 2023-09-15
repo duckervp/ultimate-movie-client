@@ -16,7 +16,6 @@ const PersistedLogin = () => {
     const verifyRefreshToken = async () => {
       try {
         const data = await refresh().unwrap();
-        console.log(data);
         dispatch(setCredentials({ accessToken: data?.access_token, role: data?.scope }));
         const { id, name, avt, sub } = jwt_decode(data?.access_token);
         dispatch(setUser({ id, name, email: sub, avatarUrl: avt }));

@@ -15,6 +15,8 @@ import { setCredentials, setUser } from './slice/authSlice';
 import Loading from '../../components/Loading';
 import jwt_decode from "jwt-decode";
 import { handleError } from '../../utils';
+import { FormControl, IconButton, InputAdornment, InputLabel, OutlinedInput } from '@mui/material';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 
 export default function RegisterForm() {
   const dispatch = useDispatch();
@@ -39,6 +41,12 @@ export default function RegisterForm() {
     } catch (err) {
       handleError(err, "Register Failed");
     }
+  };
+
+  const [showPassword, setShowPassword] = React.useState(false);
+
+  const handleClickShowPassword = () => {
+    setShowPassword((show) => !show);
   };
 
   if (isLoading) return <Loading fullScreen />
@@ -83,15 +91,29 @@ export default function RegisterForm() {
               margin="normal"
               autoComplete="off"
             />
-            <TextField
-              required
-              fullWidth
-              margin="normal"
-              name="password"
-              label="Password"
-              type="password"
-              id="password"
-            />
+            <FormControl fullWidth variant="outlined" sx={{ mt: 1 }}>
+              <InputLabel htmlFor="password">Password *</InputLabel>
+              <OutlinedInput
+                required
+                id="password"
+                name="password"
+                label="Password"
+                fullWidth
+                autoComplete='off'
+                type={showPassword ? 'text' : 'password'}
+                endAdornment={
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                }
+              />
+            </FormControl>
             <Button
               type="submit"
               fullWidth

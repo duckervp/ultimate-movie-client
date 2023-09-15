@@ -35,7 +35,7 @@ export const authApiSlice = noAuthApiSlice.injectEndpoints({
         body: { newPassword }
       }),
     }),
-    logout: builder.mutation({
+    removeRefreshToken: builder.mutation({
       query: () => ({
         url: "/users/auth/logout",
         method: "GET",
@@ -50,5 +50,5 @@ export const {
   useRefreshMutation,
   useRequestResetPasswordMutation,
   useResetPasswordMutation,
-  useLogoutMutation,
+  useRemoveRefreshTokenMutation,
 } = authApiSlice;
