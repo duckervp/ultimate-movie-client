@@ -10,6 +10,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import CampaignForm from "./CampaignForm";
 import { useFetchAllProvidersQuery } from "./slice/providerApiSlice";
 import { useAddCampaignMutation, useFetchCampaignQuery, useUpdateCampaignMutation } from "./slice/campaignApiSlice";
+import { BASE_URL } from "../../constants";
 
 const NewCampaign = ({ createNew }) => {
   const { campaignId } = useParams();
@@ -19,27 +20,10 @@ const NewCampaign = ({ createNew }) => {
   const [campaign, setCampaign] = React.useState({});
 
   // selectedRows - display rows
-  const [selectedProducer, setSelectedProducer] = React.useState(defaultProducer);
+  const [selectedProvider, setSelectedProvider] = React.useState(defaultProducer);
 
   // values for select box
   const [providers, setProviders] = React.useState([]);
-
-  // fetch campaign by id
-  const {
-    data: campaignData,
-    isError: isFetchCampaignError,
-    error: fetchCampaignError
-  } = useFetchCampaignQuery(campaignId, { skip: createNew });
-
-  React.useEffect(() => {
-    const campaignResult = campaignData?.result;
-    setCampaign(campaignResult);
-    setSelectedProducer(campaignResult?.producer);
-  }, [campaignData]);
-
-  if (isFetchCampaignError) {
-    handleError(fetchCampaignError, "Cannot fetch the campaign!");
-  }
 
   // fetch all providers
   const {
@@ -56,6 +40,23 @@ const NewCampaign = ({ createNew }) => {
     handleError(fetchAllProvidersError, "Cannot fetch providers!");
   }
 
+  // fetch campaign by id
+  const {
+    data: campaignData,
+    isError: isFetchCampaignError,
+    error: fetchCampaignError
+  } = useFetchCampaignQuery(campaignId, { skip: createNew });
+
+  React.useEffect(() => {
+    const campaignResult = campaignData?.result;
+    setCampaign(campaignResult);
+    setSelectedProvider(campaignResult?.provider);
+  }, [campaignData]);
+
+  if (isFetchCampaignError) {
+    handleError(fetchCampaignError, "Cannot fetch the campaign!");
+  }
+
   // mutation api
   const [addCampaign, { isLoading: isAdding }] = useAddCampaignMutation();
   const [updateCampaign, { isLoading: isUpdating }] = useUpdateCampaignMutation();
@@ -64,7 +65,7 @@ const NewCampaign = ({ createNew }) => {
   const hanleCampaignSave = async () => {
     const campaignPayload = {
       ...campaign,
-      providerId: selectedProducer?.id,
+      providerId: selectedProvider?.id,
     }
 
     console.log(campaignPayload);
@@ -115,12 +116,22 @@ const NewCampaign = ({ createNew }) => {
         <DisplaySelection
           label="Provider"
           dataRows={providers}
-          selectedRow={selectedProducer}
-          setSelectedRow={setSelectedProducer}
+          selectedRow={selectedProvider}
+          setSelectedRow={setSelectedProvider}
           manage
           handleManage={() => ({})}
         />
       </Box>
+
+
+      {campaign?.id && <Box>
+        <Divider sx={{ my: 5 }} />
+        <Typography variant="h5">Schedule</Typography>
+        <Typography variant="body1">
+          Campaign URL need for scheduling:
+        </Typography>
+        <Typography variant="body2">{BASE_URL.concat(`campaigns/sendCampaign/${campaign?.id}`)}</Typography>
+      </Box>}
 
       <LoadingButton
         onClick={hanleCampaignSave}

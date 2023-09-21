@@ -32,7 +32,7 @@ export default function CampaignForm(props) {
     setCampaign({ ...campaign, type: event.target.value });
   };
 
-  if (!createNew && !campaign?.name) {
+  if (!createNew && !campaign) {
     return <Loading />
   }
 

@@ -3,9 +3,20 @@ import { Box, IconButton, Toolbar, Tooltip, Typography, alpha } from "@mui/mater
 import DeleteIcon from '@mui/icons-material/Delete';
 import TuneIcon from '@mui/icons-material/Tune';
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+
 
 export default function EnhancedTableToolbar(props) {
-  const { title, numSelected, toggleCreateDialogOpen, toggleEditDialogOpen, toggleDeleteDialogOpen, scrollPosition } = props;
+  const {
+    title,
+    numSelected,
+    toggleCreateDialogOpen,
+    toggleEditDialogOpen,
+    toggleDeleteDialogOpen,
+    scrollPosition,
+    viewBtn,
+    toggleViewDialogOpen
+  } = props;
 
   return (
     <Box sx={scrollPosition > 110 ? {
@@ -48,11 +59,21 @@ export default function EnhancedTableToolbar(props) {
           </Typography>)
         }
 
-        {numSelected === 1 && (<Tooltip title="Edit">
-          <IconButton onClick={toggleEditDialogOpen}>
-            <TuneIcon />
-          </IconButton>
-        </Tooltip>)}
+        {(viewBtn && numSelected === 1)
+          && <Tooltip title="View">
+            <IconButton onClick={toggleViewDialogOpen}>
+              <VisibilityIcon />
+            </IconButton>
+          </Tooltip>
+        }
+
+        {numSelected === 1 && (
+          <Tooltip title="Edit">
+            <IconButton onClick={toggleEditDialogOpen}>
+              <TuneIcon />
+            </IconButton>
+          </Tooltip>
+        )}
 
         {numSelected > 0 ? (
           <Tooltip title="Delete">

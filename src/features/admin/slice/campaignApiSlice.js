@@ -32,6 +32,9 @@ export const campaignApiSlice = apiSlice.injectEndpoints({
         }
       },
     }),
+    fetchAllCampaignRecipients: builder.query({
+      query: (campaignId) => `/campaigns/${campaignId}/recipients`,
+    }),
   }),
 });
 
@@ -41,4 +44,5 @@ export const {
   useUpdateCampaignMutation,
   useDeleteCampaignsMutation,
   useFetchCampaignQuery,
+  useFetchAllCampaignRecipientsQuery
 } = campaignApiSlice;

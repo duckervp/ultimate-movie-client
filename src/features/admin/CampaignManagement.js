@@ -21,6 +21,7 @@ import Breadcrumb from '../../components/Breadcumb';
 import Loading from '../../components/Loading';
 import { getComparator, handleError, showSuccessMessage, stableSort } from '../../utils';
 import { useDeleteCampaignsMutation, useFetchAllCampaignsQuery } from './slice/campaignApiSlice';
+import CampaignRecipient from './CampaignRecipient';
 
 const HEAD_CELLS = [
   {
@@ -51,11 +52,9 @@ const HEAD_CELLS = [
     id: 'providerName',
     numeric: false,
     disablePadding: false,
-    label: 'Provider Name',
+    label: 'Provider',
   },
 ];
-
-
 
 export default function CampaignManagement() {
   const [searchParams] = useSearchParams();
@@ -69,6 +68,7 @@ export default function CampaignManagement() {
   const [campaigns, setCampaigns] = React.useState([]);
   const [campaignIds, setCampaignIds] = React.useState([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = React.useState(false);
+  const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
   const [scrollPosition, setScrollPosition] = React.useState(0);
   const pageNo = searchParams.get("page") || 1;
 
@@ -172,6 +172,10 @@ export default function CampaignManagement() {
     setDeleteDialogOpen(!deleteDialogOpen);
   }
 
+  const toggleViewDialogOpen = () => {
+    setViewDialogOpen(!viewDialogOpen);
+  }
+
   const toggleEditDialogOpen = () => {
     const selectedItem = getSelectedCampaigns();
     if (selectedItem.length > 0) {
@@ -209,6 +213,10 @@ export default function CampaignManagement() {
     setDeleteDialogOpen(false);
   }
 
+  const handleViewDialogClose = () => {
+    setViewDialogOpen(false);
+  }
+
   if (!searchParams.get("page")) {
     searchParams.append("page", 1);
     return <Loading />;
@@ -237,6 +245,13 @@ export default function CampaignManagement() {
         action={Action.DELETE}
         isLoading={isDeleting}
       />
+      <AlertDialog
+        open={viewDialogOpen}
+        dialogTitle="View Campaign"
+        children={<CampaignRecipient campaignId={campaignIds.length === 1 ? campaignIds.at(0) : -1} />}
+        handleClose={handleViewDialogClose}
+        saveAble={false}
+      />
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar
           title="Campaigns"
@@ -245,6 +260,8 @@ export default function CampaignManagement() {
           toggleEditDialogOpen={toggleEditDialogOpen}
           toggleDeleteDialogOpen={toggleDeleteDialogOpen}
           scrollPosition={scrollPosition}
+          viewBtn
+          toggleViewDialogOpen={toggleViewDialogOpen}
         />
         <TableContainer>
           <Table
@@ -266,7 +283,6 @@ export default function CampaignManagement() {
               {visibleRows?.map((row, index) => {
                 const isItemSelected = isSelected(row.no);
                 const labelId = `enhanced-table-checkbox-${index}`;
-
                 return (
                   <TableRow
                     hover
@@ -301,7 +317,9 @@ export default function CampaignManagement() {
                       HEAD_CELLS.map(cell => {
                         if (cell.id !== 'No') {
                           if (cell.id === "providerName") {
-                            return (<TableCell key={Math.random()} align={cell.numeric ? 'right' : 'left'}> {row.provider?.name} </TableCell>);
+                            return (<TableCell key={Math.random()} align={cell.numeric ? 'right' : 'left'}>
+                              {row.provider?.name}
+                            </TableCell>);
                           }
                           return (<TableCell key={Math.random()} align={cell.numeric ? 'right' : 'left'}> {row[cell.id]} </TableCell>);
                         }

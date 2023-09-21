@@ -2,10 +2,11 @@ import React from "react";
 import ReactPlayer from "react-player";
 import { useSelector } from "react-redux";
 import { useAddUserHistoryMutation } from "./slice/historyApiSlice";
+import { selectCurrentUser } from "../auth/slice/authSlice";
 
 const Player = ({movie, currentEpisode}) => {
 
-  const user = useSelector(state => state.user);
+  const user = useSelector(selectCurrentUser);
 
   const [apiTimeout, setApiTimeout] = React.useState(null);
 

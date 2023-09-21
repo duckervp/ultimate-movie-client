@@ -195,12 +195,12 @@ export default function ScheduleEnhancedTable() {
   const handleEditDialogSave = async () => {
     if (setScheduleIds.length === 1) {
       try {
-        const providerId = scheduleIds[0];
-        const data = await updateSchedule({ id: providerId, payload: formState }).unwrap();
+        const scheduleId = scheduleIds[0];
+        const data = await updateSchedule({ id: scheduleId, payload: formState }).unwrap();
         const updatedRows = [...rows];
         let index = 0;
         for (let i = 0; i < updatedRows.length; i++) {
-          if (updatedRows[i].id === providerId) {
+          if (updatedRows[i].id === scheduleId) {
             index = i;
           }
         }
@@ -246,8 +246,8 @@ export default function ScheduleEnhancedTable() {
       try {
         console.log(scheduleIds);
         await deleteSchedules(scheduleIds).unwrap();
-        const providers = rows.filter(row => !scheduleIds.includes(row.id)).map((row, index) => ({ ...row, no: index + 1 }));
-        setRows(providers);
+        const schedules = rows.filter(row => !scheduleIds.includes(row.id)).map((row, index) => ({ ...row, no: index + 1 }));
+        setRows(schedules);
         setSelected([]);
         setScheduleIds([]);
         const successMessage = scheduleIds.length > 1 ? "Schedules deleted successfully!" : "Schedule deleted successfully!";
@@ -281,11 +281,11 @@ export default function ScheduleEnhancedTable() {
       setScheduleIds([]);
 
       handleCreateDialogClose();
-      toast.success("Provider created successfully!", {
+      toast.success("Schedule created successfully!", {
         position: toast.POSITION.TOP_RIGHT
       });
     } catch (error) {
-      toast.error("Cannot create the provider!", {
+      toast.error("Cannot create the schedule!", {
         position: toast.POSITION.TOP_RIGHT
       });
     }
@@ -301,7 +301,7 @@ export default function ScheduleEnhancedTable() {
         links={
           [{ link: "/admin", title: "Dashboard" }]
         }
-        currentPage="Schedule Management"
+        currentPage="Schedule"
         admin
       />
       <AlertDialog
@@ -334,7 +334,7 @@ export default function ScheduleEnhancedTable() {
       />
       <AlertDialog
         open={editDialogOpen}
-        dialogTitle="Edit Provider"
+        dialogTitle="Edit Schedule"
         children={
           <ScheduleForm
             action={dialogAction}
@@ -351,7 +351,7 @@ export default function ScheduleEnhancedTable() {
       />
       <Paper sx={{ width: '100%', mb: 2 }}>
         <EnhancedTableToolbar
-          title="Provider"
+          title="Schedule"
           numSelected={selected.length}
           toggleCreateDialogOpen={toggleCreateDialogOpen}
           toggleEditDialogOpen={toggleEditDialogOpen}
@@ -372,7 +372,7 @@ export default function ScheduleEnhancedTable() {
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
               headCells={HEAD_CELLS}
-              ariaLabel={"select all providers"}
+              ariaLabel={"select all schedules"}
             />
             <TableBody>
               {visibleRows.map((row, index) => {
